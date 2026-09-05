@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "ytit1"
+version = "0.1.0"
+description = ""
+authors = ["yuszafar <zafarzafar190@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+Django = "^3.1.5"
+django-modeltranslation = "^0.16.1"
+Pillow = "^8.1.0"
+djangorestframework = "^3.12.2" # poetry add djangorestframework
+djangorestframework_simplejwt = "^4.6.0"
+psycopg2 = "^2.8.6"
+python-dotenv = "^0.15.0"
+daphne = "^3.0.1"
+gunicorn = "^20.0.4"
+django-active-link = "^0.1.6"
+XlsxWriter = "^3.0.3"
+bleach = {version = "^6.4.0", extras = ["css"]}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

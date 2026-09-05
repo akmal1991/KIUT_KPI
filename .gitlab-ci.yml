@@ -1,0 +1,20 @@
+.before_production:
+  before_script:
+    - apt-get update -qq
+    - apt-get install -qq git openssh-client sshpass
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+stages:
+  - deploy
+
+deploy_to_server:
+  stage: deploy
+  extends: .before_production
+  script:
+    - echo "Deploying application to the server..."
+    - sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no -p 11122 user@$KIUT_IP_ADDRESS "sudo su - && cd ytit && sudo git fetch ${CI_REPOSITORY_URL} --tags && sudo git checkout tags/${CI_COMMIT_TAG} -B ${CI_COMMIT_TAG} && sudo sh restart.sh exit"
+    - echo "Deployment completed."
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual

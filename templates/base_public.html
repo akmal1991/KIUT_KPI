@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+{% load i18n %}
+{% load static %}
+{% load active_link_tags %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>YTIT</title>
+    <link rel="stylesheet" href="{% static 'public/fonts/Montserrat/stylesheet.css' %}">
+    <link rel="stylesheet" href="{% static 'public/fonts/HelveticaNeueCyr/stylesheet.css' %}">
+    <link rel="stylesheet" href="{% static 'public/fonts/font-awesome/css/font-awesome.css' %}">
+    <link rel="stylesheet" href="{% static 'public/fonts/icomoon/style.css' %}">
+    <link rel="stylesheet" href="{% static 'public/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'public/bootstrap/css/bootstrap-select.min.css' %}">
+    <link rel="stylesheet" href="{% static 'public/css/main.css' %}?v=124">
+    <link rel="stylesheet" href="{% static 'public/css/media.css' %}?v=124">
+
+    <script src="{% static 'public/js/jquery.js' %}"></script>
+    <script src="{% static 'public/bootstrap/js/popper.min.js' %}"></script>
+    <script src="{% static 'public/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'public/bootstrap/js/bootstrap-select.min.js' %}"></script>
+</head>
+
+<body>
+<form id="langForm" action="{% url 'set_language' %}" method="post" style="display: none">
+    {% csrf_token %}
+    <input id="next" name="next" type="hidden" value="{{ redirect_to }}">
+    <input id="language" name="language" type="text" type="hidden" value="">
+</form>
+<div class="wrapper">
+    <header class="header home-header">
+        <div class="container">
+            <div class="header-main">
+                <div class="header-nav">
+                    <div class="header-logo">
+                        <a href="{% url 'index_public:index' %}">
+                            <img src="{% static 'public/images/logo.png' %}" alt="">
+                        </a>
+                    </div>
+                    <div class="header-menu">
+                        <a href="#menu" class="mobile-menu__opener" id="mobile-menu__opener" role="button" tabindex="0"><span>Menu</span></a>
+                        <div class="mobile-menu__screen"></div>
+
+                        <!-- Main menu -->
+                        <nav id="menu" class="menu">
+                            <a href="{% url 'index_public:index' %}" class="menu__item"
+                               id="index">{% trans 'Главная' %}</a>
+                            <a href="{% url 'post_public:list' %}"
+                               class="menu__item {% active_link 'post_public:list' 'menu__item_active' %}">{% trans 'Последняя активность' %}</a>
+                            <a href="{% url 'category_public:static' %}"
+                               class="menu__item {% active_link 'category_public:static' 'menu__item_active' %}">{% trans 'Статистика' %}</a>
+                            <a href="{% url 'user_public:division_list' %}"
+                               class="menu__item {% active_link 'user_public:division_list' 'menu__item_active' %}">{% trans 'Кафедры' %}</a>
+                            <a href="{% url 'user_public:teacher_list' %}"
+                               class="menu__item {% active_link 'user_public:teacher_list' 'menu__item_active' %}">{% trans 'Преподаватели' %}</a>
+                        </nav>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-lang">
+
+                        <div class="dropdown">
+
+                            <button class="btn btn-secondary dropdown-toggle" id="dropdownLang" data-toggle="dropdown">
+                                {% get_current_language as LANGUAGE_CODE %}
+                                {{ LANGUAGE_CODE }}
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownLang">
+                                {% get_available_languages as LANGUAGES %}
+                                {% get_language_info_list for LANGUAGES as languages %}
+                                {% for language in languages %}
+                                    {% if language.code == LANGUAGE_CODE %}
+
+                                    {% else %}
+                                        <a class="dropdown-item changeLang" data-lang="{{ language.code }}"
+                                           href="#">{{ language.code }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    {% block content %}
+
+    {% endblock %}
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-main">
+                <div class="footer-info">
+                    <a href="{% url 'index_public:index' %}" class="footer-logo">
+                        <img src="{% static 'public/images/logo.png' %}" alt="">
+                    </a>
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <ul class="footer-menu">
+                                <li>
+                                    <a href="{% url 'post_public:list' %}">{% trans 'Статистика' %}</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'user_public:division_list' %}">{% trans 'Кафедры' %}</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'user_public:teacher_list' %}">{% trans 'Преподаватели' %}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="footer-copy">
+                                <span>{% trans 'Все права защищены' %}. {% now 'Y' %} </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </footer>
+    <script>
+        $(".changeLang").click(function (event) {
+            event.preventDefault();
+
+            $("#language").val($(this).data('lang'));
+            $("#langForm").submit();
+        });
+
+        (function ($) {
+            'use strict';
+
+            $(document).ready(function () {
+                // DropDown menu on mobile devices
+                $('#mobile-menu__opener').on('click touchstart', function (e) {
+                    e.preventDefault();
+
+                    if (!$('#menu').hasClass('menu_slide_up')) {
+                        $('#menu').addClass('menu_slide_up');
+                    }
+
+                    $('#menu').toggleClass('menu_slide_down');
+                    $(this).toggleClass('mobile-menu__opener_menu_open');
+                });
+
+                // For resize window on desktop devices
+                $(window).resize(function () {
+                    if ($(window).width() > 768) {
+                        if ($('#menu').hasClass('menu_slide_up')) {
+                            $('#menu').removeClass('menu_slide_up');
+                        }
+
+                        if ($('#menu').hasClass('menu_slide_down')) {
+                            $('#menu').removeClass('menu_slide_down');
+                            $('#mobile-menu__opener').removeClass('mobile-menu__opener_menu_open');
+                        }
+                    }
+                });
+            });
+
+        })(jQuery);
+    </script>
+    {% block js %}
+
+    {% endblock %}
+
+</div>
+</body>
+
+</html>

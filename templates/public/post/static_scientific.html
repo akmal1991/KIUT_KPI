@@ -1,0 +1,428 @@
+{% extends 'base_public.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <div class="block-grey">
+            <figure class="highcharts-figure">
+                <div id="teachers"></div>
+            </figure>
+        </div>
+        <div class="block-grey">
+            <figure class="highcharts-figure">
+                <div id="container"></div>
+            </figure>
+        </div>
+        {% for scientific in object_list %}
+            <div class="block-grey">
+                <figure class="highcharts-figure">
+                    <div id="{{ scientific.name }}"></div>
+                </figure>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+    <script>
+        Highcharts.chart('teachers', {
+            chart: {
+                height: 340,
+                type: 'pie',
+                events: {
+                    render: function () {
+                        const chart = this;
+
+                        chart.series.forEach(function (series) {
+
+                            if (!series.centerLabel) {
+                                series.centerLabel = chart.renderer.text(
+                                    series.name,
+                                    chart.plotLeft + series.center[0],
+                                    chart.plotTop + series.center[1]
+                                )
+                                    .css({
+                                        color: '#333333',
+                                        fontSize: '14px',
+                                    })
+                                    .attr({
+                                        'text-anchor': 'middle',
+                                        'alignment-baseline': 'middle'
+                                    })
+                                    .add();
+                            } else {
+                                series.centerLabel.attr({
+                                    x: chart.plotLeft + series.center[0],
+                                    y: chart.plotTop + series.center[1]
+                                });
+                            }
+                        });
+                    }
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            title: {
+                text: "{% trans 'Статистика ППС по KPI' %}",
+            },
+            tooltip: {
+                pointFormat: 'Percent: <b>{point.percentage:.2f}%</b><br>Teachers: <b>{point.y}</b>'
+            },
+            plotOptions: {
+                pie: {
+                    backgroundColor: null,
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    depth: 30,
+                    dataLabels: {
+                        formatter: function () {
+                            if (this.y > 0) {
+                                return `${this.point.y}`
+                            }
+                        },
+                        enabled: true,
+                        connectorColor: '#777777',
+                        connectorWidth: 1.5,
+                    },
+                    alignColumns: true,
+                    states: {
+                        inactive: {
+                            enabled: false
+                        },
+                        hover: {
+                            enabled: false
+                        }
+                    }
+                }
+            },
+            colors: ['#FF974A', '#0062FF', '#FFC542', '#3DD598'],
+            series: [{
+                name: '{{ status_teachers.0.year }}',
+                colorByPoint: true,
+                type: 'pie',
+                innerSize: '75%',
+                data: [{
+                    name: '> 150',
+                    y: {{ status_teachers.0.gt_150 }},
+                }, {
+                    name: '< 150',
+                    y: {{ status_teachers.0.lt_150 }}
+                }, {
+                    name: '< 100',
+                    y: {{ status_teachers.0.lt_100 }}
+                }, {
+                    name: '< 55',
+                    y: {{ status_teachers.0.lt_55 }}
+                }],
+                center: ['10%', 100],
+                showInLegend: true,
+                point: {
+                    events: {
+                        legendItemClick: function () {
+                            const point = this,
+                                series = point.series.chart.series;
+
+                            for (let i = 1; i < 4; i++) {
+                                series[i].points[point.index].setVisible(!point.visible);
+                            }
+                        }
+                    }
+                }
+            }, {
+                name: '{{ status_teachers.1.year }}',
+                colorByPoint: true,
+                type: 'pie',
+                innerSize: '75%',
+                data: [{
+                    name: '> 150',
+                    y: {{ status_teachers.1.gt_150 }},
+                }, {
+                    name: '< 150',
+                    y: {{ status_teachers.1.lt_150 }}
+                }, {
+                    name: '< 100',
+                    y: {{ status_teachers.1.lt_100 }}
+                }, {
+                    name: '< 55',
+                    y: {{ status_teachers.1.lt_55 }}
+                }],
+                center: ['35%', 100],
+            }, {
+                name: '{{ status_teachers.2.year }}',
+                colorByPoint: true,
+                type: 'pie',
+                innerSize: '75%',
+                data: [{
+                    name: '> 150',
+                    y: {{ status_teachers.2.gt_150 }},
+                }, {
+                    name: '< 150',
+                    y: {{ status_teachers.2.lt_150 }}
+                }, {
+                    name: '< 100',
+                    y: {{ status_teachers.2.lt_100 }}
+                }, {
+                    name: '< 55',
+                    y: {{ status_teachers.2.lt_55 }}
+                }],
+                center: ['65%', 100],
+            }, {
+                name: '{{ status_teachers.3.year }}',
+                colorByPoint: true,
+                type: 'pie',
+                innerSize: '75%',
+                data: [{
+                    name: '> 150',
+                    y: {{ status_teachers.3.gt_150 }},
+                }, {
+                    name: '< 150',
+                    y: {{ status_teachers.3.lt_150 }}
+                }, {
+                    name: '< 100',
+                    y: {{ status_teachers.3.lt_100 }}
+                }, {
+                    name: '< 55',
+                    y: {{ status_teachers.3.lt_55 }}
+                }],
+                center: ['90%', 100],
+            }
+            ]
+        });
+
+        Highcharts.chart('container', {
+            credits: {
+                enabled: false
+            },
+            chart: {
+                type: 'column',
+                events: {
+                    load: function () {
+                        const chart = this;
+                        const max = chart.yAxis[0].max;
+                        chart.yAxis[0].setExtremes(0, max)
+                        let mainSeries = []
+                        let backgroundSeries = []
+                        chart.series.forEach(point => {
+                            backgroundSeries.push({
+                                data: point.yData.map(element => 10000000),
+                                color: '#ECECEC',
+                                stack: point.name,
+                                name: point.name,
+                                showInLegend: false,
+                                enableMouseTracking: false,
+                            })
+                            mainSeries.push({
+                                data: point.yData,
+                                color: point.color,
+                                stack: point.name,
+                                name: point.name,
+                            })
+                        });
+                        while (chart.series.length > 0)
+                            chart.series[0].remove(true);
+                        backgroundSeries.forEach(el => {
+                            chart.addSeries(el)
+                        })
+                        mainSeries.forEach(el => {
+                            chart.addSeries(el)
+                        })
+                    }
+                }
+            },
+            title: {
+                text: "{% trans 'Статистика научной деятельности' %}"
+            },
+            subtitle: {
+                text: "{% trans  'Научные инновации' %}"
+            },
+            xAxis: {
+                categories: [
+                    '2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025', '2025-2026',
+                    '2026-2027', '2027-2028', '2028-2029', '2029-2030', '2030-2031', '2031-2032', '2032-2033'
+                ],
+                crosshair: {
+                    color: 'rgba(178,205,255,0.09)'
+                },
+                plotLines: [
+                    {% for post in object_list %}
+                        {% if forloop.counter != object_list.count %}
+                            {
+                                color: '#6B6B6B',
+                                width: 1,
+                                value: 0.5 + {{ forloop.counter0 }}, // Позиция разделительной линии между первой и второй серией
+                                zIndex: 4, // Выше чем столбцы
+                                dashStyle: 'dash'
+                            },
+                        {% endif %}
+                    {% endfor %}
+                ],
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: "{% trans  'Количество баллов' %}"
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    stacking: 'normal',
+                    pointPadding: 0.2,
+                },
+                series: {
+                    states: {
+                        inactive: {
+                            opacity: 1
+                        }
+                    }
+                }
+            },
+            colors: ['#FF974A', '#0062FF', '#FFC542', '#3DD598', '#34ADFE'],
+            series: [
+                {% for post in object_list %}
+                    {
+                        name: '{{ post.name }}',
+                        data: {{ post.get_total_series }},
+                        stack: '{{ post.name }}'
+                    },
+                {% endfor %}
+            ],
+        });
+
+        {% for scientific in object_list %}
+            Highcharts.chart('{{ scientific.name }}', {
+                chart: {
+                    type: 'column',
+                    events: {
+                        load: function () {
+                            const chart = this;
+                            const max = chart.yAxis[0].max;
+                            chart.yAxis[0].setExtremes(0, max)
+                            let mainSeries = []
+                            let backgroundSeries = []
+                            chart.series.forEach(point => {
+                                backgroundSeries.push({
+                                    data: point.yData.map(element => 10000000),
+                                    color: '#ECECEC',
+                                    stack: point.name,
+                                    name: point.name,
+                                    showInLegend: false,
+                                    enableMouseTracking: false,
+                                })
+                                mainSeries.push({
+                                    data: point.yData,
+                                    color: point.color,
+                                    stack: point.name,
+                                    name: point.name,
+                                })
+                            });
+                            while (chart.series.length > 0)
+                                chart.series[0].remove(true);
+                            backgroundSeries.forEach(el => {
+                                chart.addSeries(el)
+                            })
+                            mainSeries.forEach(el => {
+                                chart.addSeries(el)
+                            })
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                plotOptions: {
+                    column: {
+                        stacking: 'normal',
+                        maxPointWidth: 15,
+                        pointPadding: 0.01,
+                        {% if scientific.category_types.count == 2 %}
+                            groupPadding: 0.38,
+                        {% endif %}
+                        {% if scientific.category_types.count == 3 %}
+                            groupPadding: 0.32,
+                        {% endif %}
+                        {% if scientific.category_types.count == 4 %}
+                            groupPadding: 0.28,
+                        {% endif %}
+                        {% if scientific.category_types.count == 7 %}
+                            groupPadding: 0.08,
+                        {% else %}
+                            groupPadding: 0.43 - 0.04 * {{ scientific.category_types.count }},
+                        {% endif %}
+                    },
+                    series: {
+                        states: {
+                            inactive: {
+                                opacity: 1
+                            }
+                        }
+                    }
+                },
+                title: {
+                    text: '{{ scientific.name }}'
+                },
+                xAxis: {
+                    categories: [
+                        '2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025', '2025-2026',
+                        '2026-2027', '2027-2028', '2028-2029', '2029-2030', '2030-2031', '2031-2032', '2032-2033'
+                    ],
+                    crosshair: {
+                        color: 'rgba(178,205,255,0.09)'
+                    },
+                    plotLines: [
+                        {% for post in object_list %}
+                            {% if forloop.counter != object_list.count %}
+                                {
+                                    color: '#6B6B6B',
+                                    width: 1,
+                                    value: 0.5 + {{ forloop.counter0 }}, // Позиция разделительной линии между первой и второй серией
+                                    zIndex: 4, // Выше чем столбцы
+                                    dashStyle: 'dash'
+                                },
+                            {% endif %}
+                        {% endfor %}
+                    ]
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: "{% trans  'Количество баллов' %}"
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                        '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                colors: ['#FF974A', '#0062FF', '#3DD598', '#FFC542', '#34ADFE', '#FC6536', '#D359FB', '#759ADE', '#16D9BB', '#27E772', '#5346C5'],
+                series: [
+                    {% for category in scientific.category_types.all %}
+                        {
+                            name: '{{ category.name }}',
+                            data: {{ category.get_total_series }},
+                            stack: '{{ category.name }}'
+                        },
+                    {% endfor %}
+                ],
+            });
+        {% endfor %}
+    </script>
+{% endblock %}

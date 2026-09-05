@@ -1,0 +1,89 @@
+{% extends 'base_admin.html' %}
+{% load category_coef %}
+
+{% load static %}
+
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="main-title d-flex align-items-center justify-content-between">
+            <h1 class="">Отчет</h1>
+        </div>
+
+        <ol class="breadcrumb-war mb-4 d-flex justify-content-between">
+            <div>
+                &nbsp;&nbsp;&nbsp;
+                <li class="breadcrumb-war-item"><a href="{% url 'index_admin:index' %}">Главная</a></li> &nbsp;
+                <li class="breadcrumb-war-item active">/ Отчет</li>
+            </div>
+        </ol>
+
+
+        <div class="form-group-search">
+            <div class="row align-items-center">
+                <div class="col-2">
+                    <select id="yearInput" class="form-control selectpicker">
+                        {% for academic_year in academic_year_list %}
+                            {% if request.GET.academic_year %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year.id == request.GET.academic_year|add:"0" %}
+                                        selected {% endif %}>{{ academic_year.years }}</option>
+                            {% else %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year.id == current_academic_year %}
+                                        selected {% endif %}>{{ academic_year.years }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-2">
+                    <a href="{% url 'api_post:post_download_xlsx' %}"
+                       class="btn btn-secondary receiptExcel mx-0 mr-2">
+                        Excel Аналитика
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="#" class="btn btn-secondary receiptExcel mx-0 mr-2" id="excelButton">
+                        Excel Преподаватели
+                    </a>
+                </div>
+                <div class="col-4">
+                    <a href="#" class="btn btn-secondary receiptExcel mx-0 mr-2" id="excelForm2Button">
+                        Excel Преподаватели Form 2
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+{% endblock %}
+
+
+{% block modals %}
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $("#yearInput").on('change', function (e) {
+            let academic_year = $("#yearInput").val();
+            window.location.href = `?academic_year=${academic_year}`;
+        });
+
+        document.getElementById("excelButton").addEventListener("click", function () {
+            let currentUrl = window.location.href;
+            let link = document.getElementById("excelButton");
+            let params = new URL(currentUrl).searchParams;
+            link.href = "{% url 'api_post:teacher_download_xlsx' %}?" + params;
+        });
+
+        document.getElementById("excelForm2Button").addEventListener("click", function () {
+            let currentUrl = window.location.href;
+            let link = document.getElementById("excelForm2Button");
+            let params = new URL(currentUrl).searchParams;
+            link.href = "{% url 'api_post:teacher_form2_download_xlsx' %}?" + params;
+        });
+    </script>
+{% endblock %}

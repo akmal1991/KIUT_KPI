@@ -1,0 +1,435 @@
+{% extends 'base_admin.html' %}
+{% load category_coef %}
+
+{% load static %}
+
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="main-title d-flex align-items-center justify-content-between">
+            <h1 class="">Категории</h1>
+            <a href="#openAddCategory" class="openAddCategoryBtn btn btn-primary">Добавить</a>
+        </div>
+    
+        <ol class="breadcrumb-war mb-4 d-flex justify-content-between">
+            <div>
+                &nbsp;&nbsp;&nbsp;
+                <li class="breadcrumb-war-item"><a href="{% url 'index_admin:index' %}">Главная</a></li> &nbsp;
+                <li class="breadcrumb-war-item active">/ Категории</li>
+            </div>
+            <li class="breadcrumb-item">
+                <a href="{% url 'category_admin:list' %}?limit_by_year={{ limit_by_year }}" class="header-right__btn_right"
+                   id="collapse-warning" data-toggle="tooltip" data-placement="left">
+                    <img src="{% static 'images/warning.svg' %}" alt="warning">
+                    <span id="count-warning">{{ category_limit_count }}</span>
+                </a>
+                &nbsp;&nbsp;&nbsp;
+            </li>
+        </ol>
+
+
+        <div class="form-group-search">
+            <div class="row align-items-center">
+                <div class="col-4">
+                    <select id="groupInput" class="form-control">
+                        <option value="">Select by type...</option>
+                        {% for group in group_list %}
+                            {% if request.GET.group %}
+                                <option value="{{ group.id }}"
+                                        {% if group.id == request.GET.group|add:"0" %}
+                                        selected {% endif %}>{{ group.name }}</option>
+                            {% else %}
+                                <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-4"></div>
+                <div class="col-4">
+                    <select id="yearInput" class="form-control">
+                        <option value="">Category Limit Expired...</option>
+                        {% for academic_year in academic_years_for_select %}
+                            {% if request.GET.limit_by_year %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year.id == request.GET.limit_by_year|add:"0" %}
+                                        selected {% endif %}>{{ academic_year.years }}</option>
+                            {% else %}
+                                <option value="{{ academic_year.id }}">{{ academic_year.years }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-table">
+            <table class="interior-table ">
+                <thead>
+                <tr>
+                    <th width="1%">№</th>
+                    <th width="100px">Название</th>
+                    <th width="10px">Тип</th>
+                    {% for academic_year in academic_years %}
+                        <th width="5px">{{ academic_year.years }}</th>
+                    {% endfor %}
+                    <th width="1%">Лимит</th>
+                    <th width="1%"></th>
+                    <th width="1%"></th>
+                </tr>
+                </thead>
+                <tbody class="tbody">
+                {% for category in category_list %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                        <td><a href="{% url 'category_admin:coefficient-year' category.id %}">{{ category.name_ru }}</a>
+                        </td>
+                        <td>{{ category.group }}</td>
+                        {% for academic_year in academic_years %}
+                            <td>{{ category|get_coef_for_year:academic_year }}</td>
+                        {% endfor %}
+                        <td>
+                            {% if category.limit %}
+                                <a href="{% url 'user_admin:teacher_list' %}?category={{ category.id }}&{% if request.GET.limit_by_year %}limit_by_year={{ request.GET.limit_by_year }}{% endif %}">{{ category.limit }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="#openEditCategory"
+                               data-url="{% url 'api_category:get_update_delete' category.id %}"
+                               class="badge bg-primary openEditCategoryBtn"><i class="fas fa-edit"></i></a>
+                        </td>
+                        <td>
+                            <a href="#openDeleteCategory"
+                               data-url="{% url 'api_category:get_update_delete' category.id %}"
+                               class="badge bg-danger openDeleteCategoryBtn"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+            <br>
+            {% load paginator %}
+            {% get_public_pagination %}
+        </div>
+
+    </div>
+{% endblock %}
+
+
+{% block modals %}
+    {#    Create  Category#}
+    <div id="openAddCategory" class="white-popup white-popup__middle mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Добавить</h2>
+            </div>
+            <div class="popup-content">
+                <form action="">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="category_ru">Категория(ru): <span class="red"> * </span></label>
+                                <input type="text" class="form-control" name="category_ru" id="category_ru" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="category_en">Категория(en):</label>
+                                <input type="text" class="form-control" name="category_en" id="category_en">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="category_uz">Категория(uz):</label>
+                                <input type="text" class="form-control" name="category_uz" id="category_uz">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="coefficient">Коэффициент: <span class="red"> * </span></label>
+                                <input type="number" class="form-control" step="0.1" name="coefficient" id="coefficient"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="coefficient">Группа:</label>
+                                <select class="selectpicker form-control" name="group" id="group" required>
+                                    {% for group in group_list %}
+                                        <option value="{{ group.id }}">{{ group.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="limit">Лимит: <span class="red"> * </span></label>
+                                <input type="number" class="form-control" step="1" name="limit" min="0"
+                                       id="limit"
+                                       required>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="saveAddCategory" href="#" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+    {#    Update  Category#}
+    <div id="openEditCategory" class="white-popup white-popup__middle mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Редактировать</h2>
+            </div>
+            <div class="popup-content">
+                <form action="">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="category_ruE">Категория(ru): <span class="red"> * </span></label>
+                                <input type="text" class="form-control" name="category_ruE" id="category_ruE" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="category_enE">Категория(en):</label>
+                                <input type="text" class="form-control" name="category_enE" id="category_enE">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="category_uzE">Категория(uz):</label>
+                                <input type="text" class="form-control" name="category_uzE" id="category_uzE">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="coefficientE">Коэффициент: <span class="red"> * </span></label>
+                                <input type="number" class="form-control" step="0.1" name="coefficientE"
+                                       id="coefficientE"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="groupE">Группа:</label>
+                                <select class="selectpicker form-control" name="groupE" id="groupE" required>
+                                    {% for group in group_list %}
+                                        <option value="{{ group.id }}">{{ group.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="limitE">Лимит: <span class="red"> * </span></label>
+                                <input type="number" class="form-control" step="1" name="limitE" min="0"
+                                       id="limitE"
+                                       required>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="saveEditCategory" href="#" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+    {#    Delete  Category#}
+    <div id="openDeleteCategory" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Удалить</h2>
+            </div>
+            <div class="popup-content">
+                <p>Вы действительно хотите удалить ?</p>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="deleteCategoryBtn" href="#" class="btn btn-delete">Удалить</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        const url_string = window.location.href;
+        const url = new URL(url_string);
+        const select_group = url.searchParams.get("select-group");
+        if (select_group !== null) {
+            $('#select-group').val(select_group)
+        }
+
+        {#Create Category#}
+        $('.openAddCategoryBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+        $("#saveAddCategory").click(function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+
+            formData.append("name_uz", $("#category_uz").val());
+            formData.append("name_ru", $("#category_ru").val());
+            formData.append("name_en", $("#category_en").val());
+            formData.append("coef", $("#coefficient").val());
+            formData.append("group", $("#group").val());
+            formData.append("limit", $("#limit").val());
+            console.log(formData)
+            let url = "{% url 'api_category:create' %}";
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: url,
+                processData: false,
+                contentType: false,
+                method: 'POST',
+                data: formData,
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        {#Update Category#}
+        let edit_url = "";
+        $('.openEditCategoryBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+        $('.openEditCategoryBtn').click(function () {
+            edit_url = $(this).data('url');
+
+            $.getJSON(`${edit_url}`, function (data) {
+
+                $("#category_uzE").val(data.name_uz);
+                $("#category_ruE").val(data.name_ru);
+                $("#category_enE").val(data.name_en);
+                $("#coefficientE").val(data.coef);
+                $("#limitE").val(data.limit);
+                $("#groupE").val(data.group).trigger('change');
+
+                setTimeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                }, 500);
+            });
+        });
+        $("#saveEditCategory").click(function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+
+            formData.append("name_uz", $("#category_uzE").val());
+            formData.append("name_ru", $("#category_ruE").val());
+            formData.append("name_en", $("#category_enE").val());
+            formData.append("coef", $("#coefficientE").val());
+            formData.append("group", $("#groupE").val());
+            formData.append("limit", $("#limitE").val());
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: edit_url,
+                processData: false,
+                contentType: false,
+                method: 'PUT',
+                data: formData,
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        /* Delete Category */
+        let delete_url = "";
+        $('.openDeleteCategoryBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+
+        $('.openDeleteCategoryBtn').click(function () {
+            delete_url = $(this).data('url');
+        });
+
+        $("#deleteCategoryBtn").click(function (event) {
+            event.preventDefault();
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: delete_url,
+                method: 'DELETE',
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        $('.btn-close').click(function (event) {
+            event.preventDefault();
+
+            $.magnificPopup.close();
+        });
+
+
+        $("#yearInput").on('change', function (e) {
+            let academic_year = $("#yearInput").val();
+            updateUrlParameter('limit_by_year', academic_year);
+        });
+
+        $("#groupInput").on('change', function (e) {
+            let group = $("#groupInput").val();
+            updateUrlParameter('group', group);
+        });
+
+        function updateUrlParameter(key, value) {
+            let currentUrl = window.location.href;
+            let url = new URL(currentUrl);
+            if (url.searchParams.has('page')) {
+                url.searchParams.delete('page');
+            }
+            url.searchParams.set(key, value);
+            window.location.href = url.toString();
+        }
+
+    </script>
+
+
+{% endblock %}

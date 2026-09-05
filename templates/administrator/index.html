@@ -1,0 +1,373 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="main-title d-flex align-items-center justify-content-between">
+            <h1 class="">Главная</h1>
+            <div class="form-group d-flex">
+                <select id="yearInput" class="form-control selectpicker">
+                    {% for academic_year in academic_year_list %}
+                        {% if request.GET.academic_year %}
+                            <option value="{{ academic_year.id }}"
+                                    {% if academic_year.id == request.GET.academic_year|add:"0" %}
+                                    selected {% endif %}>{{ academic_year.years }}</option>
+                        {% else %}
+                            <option value="{{ academic_year.id }}"
+                                    {% if academic_year.id == current_academic_year %}
+                                    selected {% endif %}>{{ academic_year.years }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="block-grey">
+                    <select id="reportType" class="form-control selectpicker">
+                        <option value="1">{% trans 'Годовая статистика' %}</option>
+                        <option value="2">{% trans 'По академическим годам' %}</option>
+                    </select>
+
+                    <figure class="highcharts-figure">
+                        <div id="container"></div>
+                    </figure>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie mr-1"></i>
+                        Общая статистика по категориям
+                    </div>
+                    <div class="block-grey">
+                        <figure class="highcharts-figure">
+                            <div id="pie1"></div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block modals %}
+
+{% endblock %}
+
+
+{% block js %}
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script>
+        $("#yearInput").on('change', function (e) {
+            let academic_year = $("#yearInput").val();
+            window.location.href = `?academic_year=${academic_year}`;
+
+        });
+
+        function init_cur_year_report() {
+            const chart_posts = Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: '{% trans 'Статистика' %}'
+                },
+                subtitle: {
+                    // text: 'Plain'
+                },
+                xAxis: {
+                    categories: [
+                        {% for i in month_list %}
+                            '{{ i }}',
+                        {% endfor %}
+                    ]
+                },
+                yAxis: {
+                    title: {
+                        text: 'кол-во баллов'
+                    }
+                },
+                colors: ["#7cb5ec"],
+                series: [{
+                    name: 'кол-во баллов',
+                    id: 'ball',
+                    type: 'column',
+                    colorByPoint: true,
+                    showInLegend: false
+                }],
+                plotOptions: {
+                    column: {
+                        stacking: 'normal'
+                    }
+                },
+            });
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: "{% url 'api_post:report' %}?academic_year={{ request.GET.academic_year }}",
+                method: 'GET',
+
+                success: function (data) {
+                    let ball = [];
+
+                    for (i = 0; i < data.length; i++) {
+
+                        let column_color = '#f7a35c'
+                        if (data[i].id == -3) {
+                            column_color = '#ff0000'
+                        }
+                        if (data[i].id == 1) {
+                            column_color = '#90ed7d'
+                        }
+                        if (data[i].id == 2) {
+                            column_color = '#7cb5ec'
+                        }
+
+
+                        chart_posts.addSeries({
+                            "color": column_color,
+                            "name": data[i].id == -3 ? data[i].group_name + "(нарушения)" : data[i].group_name,
+                            "data": data[i].total_balls,
+                            "stack": Math.abs(data[i].id)
+                        })
+
+                        {#ball.push(data[i].ball);#}
+
+                    }
+                    {#chart_posts.get("ball").update({data: ball});#}
+                }
+            });
+        }
+
+        function init_all_year_report() {
+            teacher_chart = Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                tooltip: {
+                    formatter: function () {
+                        str = "";
+                        for (let i = 0; i < this.point.series.userOptions.categories.length; i++) {
+                            if (this.point.series.userOptions.categories[i].balls[this.point.index] != 0) {
+                                str += this.point.series.userOptions.categories[i].name + ": " + this.point.series.userOptions.categories[i].balls[this.point.index] + "<br>";
+                            }
+                        }
+
+                        return str;
+                    }
+                },
+                title: {
+                    text: '{% trans 'Статистика' %}'
+                },
+                xAxis: {
+                    id: "years",
+                    categories: [],
+                    title: {
+                        text: '{% trans 'Год' %}'
+                    }
+                },
+                yAxis: {
+                    id: 'teacher_y_axis',
+                    title: {
+                        text: '{% trans 'Количество баллов' %}'
+                    },
+                    stackLabels: {
+                        enabled: true,
+                        style: {
+                            fontWeight: 'bold',
+                            color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                        }
+                    }
+                },
+                legend: {
+                    reversed: true
+                },
+                plotOptions: {
+                    series: {
+                        stacking: 'normal'
+                    }
+                },
+                series: []
+            });
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: "{% url 'api_user:total_report' %}",
+                method: 'GET',
+
+                success: function (data) {
+                    let years = [];
+
+                    for (let i = 0; i < data.academic_years.length; i++) {
+                        years.push(`${data.academic_years[i]}`);
+                    }
+                    for (let i = 0; i < data.group.length; i++) {
+                        let column_color = '#f7a35c'
+                        if (data.group[i].id == 1) {
+                            column_color = '#90ed7d'
+                        }
+                        if (data.group[i].id == 2) {
+                            column_color = '#7cb5ec'
+                        }
+
+
+                        teacher_chart.addSeries({
+                            "color": column_color,
+                            "name": data.group[i].name,
+                            "data": data.group[i].total_balls,
+                            "categories": data.group[i].category
+                        })
+                    }
+                    teacher_chart.get("years").update({categories: years});
+
+                    let teacher_plot_lines = [{
+                        color: '#4CAF50',
+                        width: 1,
+                        dashStyle: 'LongDashDot',
+                        zIndex: 3,
+                        value: data.high_line
+                    }, {
+                        color: '#FF0000',
+                        width: 1,
+                        dashStyle: 'LongDashDot',
+                        zIndex: 3,
+                        value: data.low_line
+                    }]
+                    {#console.log(data)#}
+                    teacher_chart.get("teacher_y_axis").update({plotLines: teacher_plot_lines});
+                }
+
+            });
+        }
+
+        init_cur_year_report()
+        $("#reportType").on('change', function (e) {
+            if ($("#reportType").val() === "2")
+                init_all_year_report();
+            else
+                init_cur_year_report();
+
+        })
+
+        $.ajax({
+            headers: {"X-CSRFToken": "{{csrf_token}}"},
+            url: "{% url 'api_post:report' %}",
+            method: 'GET',
+
+            success: function (data) {
+                let ball = [];
+
+                for (i = 0; i < data.length; i++) {
+
+                    ball.push(data[i].ball);
+
+                }
+                chart_posts.get("ball").update({data: ball});
+            }
+        });
+
+
+        const chart_category = Highcharts.chart('pie1', {
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: "{% trans 'Cтатистика по категориям'%}"
+            },
+            {#colors: ["#7cb5ec", "#6af37a", "#0cbaf6", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1"],#}
+
+            tooltip: {
+                pointFormat: '<b>{point.y:.1f}</b>'
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: '%'
+                }
+            },
+
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                        events: {
+                            click: function () {
+                                location.href = this.options.url;
+                            }
+                        }
+                    }
+                },
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: false,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                    }
+                }
+            },
+            series: [{
+                id: 'category_series',
+                name: 'Brands',
+                colorByPoint: true,
+
+            }]
+        });
+        {% get_current_language as LANGUAGE_CODE %}
+        let cur_lang = "{{ LANGUAGE_CODE }}"
+
+        $.ajax({
+            headers: {"X-CSRFToken": "{{csrf_token}}"},
+            url: "{% url 'api_category:report_group' %}?academic_year={{ request.GET.academic_year }}",
+            method: 'GET',
+
+            success: function (data) {
+                let ball = [];
+
+                for (i = 0; i < data.length; i++) {
+                    /*if (cur_lang == "ru") {
+                        ball.push({name: data[i].name_ru, y: data[i].ball});
+                    } else if (cur_lang == "en") {
+                        ball.push({name: data[i].name_en, y: data[i].ball});
+                    } else {
+                        ball.push({name: data[i].name_uz, y: data[i].ball});
+                    }*/
+                    let column_color = '#f7a35c'
+                    if (data[i].id == 1) {
+                        column_color = '#90ed7d'
+                    }
+                    if (data[i].id == 2) {
+                        column_color = '#7cb5ec'
+                    }
+
+                    ball.push({
+                        name: data[i].name,
+                        y: data[i].ball,
+                        url: `/post/list?group=${data[i].id}`,
+                        color: column_color
+                    });
+                    if (data[i].id == 3 && data[i].minus_ball > 0) {
+
+                        column_color = '#ff0000'
+                        ball.push({
+                            name: "Нарушения",
+                            y: data[i].minus_ball,
+                            url: `/post/list?group=${data[i].id}`,
+                            color: column_color
+                        });
+                    }
+                }
+                chart_category.get("category_series").update({data: ball});
+            }
+        });
+
+    </script>
+{% endblock %}

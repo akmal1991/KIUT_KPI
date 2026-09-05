@@ -1,0 +1,535 @@
+{% extends 'base_public.html' %}
+{% load static %}
+{% load teacher_filter %}
+{% load i18n %}
+{% block content %}
+    <section class="home">
+        <div class="container">
+            <div>
+                <div class="form-group col-2 offset-10 d-flex">
+                    <a href="{% url 'api_post:post_download_xlsx' %}"
+                       class="btn btn-secondary receiptExcel mx-0 mr-2">
+                        Excel
+                    </a>
+                    <select id="yearInput" class="form-control selectpicker">
+                        {% for academic_year in academic_year_list %}
+                            {% if request.GET.academic_year %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year.id == request.GET.academic_year|add:"0" %}
+                                        selected {% endif %}>{{ academic_year.years }}</option>
+                            {% else %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year.id == current_academic_year %}
+                                        selected {% endif %}>{{ academic_year.years }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="block-grey">
+                        <h2 class="block-grey__title">{% trans 'Топ рейтинг' %}</h2>
+                        <div class="top-list">
+                            <a href='' class='techers_next_btn' hidden>{% trans 'Ещё' %}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8 align-self-end">
+
+                    <div class="block-grey">
+                        <select id="reportType" class="form-control selectpicker">
+                            <option value="1">{% trans 'Годовая статистика' %}</option>
+                            <option value="2">{% trans 'По академическим годам' %}</option>
+                        </select>
+
+                        <figure class="highcharts-figure">
+                            <div id="container"></div>
+                        </figure>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="block-grey">
+                        <h2 class="block-grey__title">{% trans 'Последняя активность' %}</h2>
+                        <div class="works-table p-0 overflow-auto" style="height: 400px">
+                            <table class="table">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th width="1%">#</th>
+                                    <th width="300px">{% trans 'Название' %}</th>
+                                    <th width="90px">{% trans 'Год' %}</th>
+                                    <th class="text-center" width="1%">{% trans 'Статуc' %}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                            <a href='' class='posts_next_btn' hidden>{% trans 'Ещё' %}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="block-grey">
+                        <figure class="highcharts-figure">
+                            <div id="pie"></div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+{% endblock %}
+
+
+{% block js %}
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script>
+        let next_item_link = ''
+        $.ajax({
+            headers: {"X-CSRFToken": "{{csrf_token}}"},
+            url: "{% url 'api_user:teacher_list' %}?academic_year={{ request.GET.academic_year }}",
+            method: 'GET',
+
+            success: function (data) {
+                next_item_link = data.next
+                for (let i = 0; i < data.results.length; i++) {
+                    let content = `<a href="/user/teacher/${data.results[i].id}" class="top-item">
+                                    <div class="top-item__image">
+
+                                            <img src="${data.results[i].image != null ? data.results[i].image : "/static/public/images/banner1.jpg"}" alt="">
+                                    </div>
+                                    <div class="top-item__info">
+                                        <h3>${data.results[i].full_name}</h3>
+                                        <span>${data.results[i].position}</span> <br>
+                                        <strong>{% trans 'Баллы' %}: ${data.results[i].total_ball}</strong>
+                                    </div>
+                                </a>
+                                <br>
+                                `
+                    $(content).insertBefore('.techers_next_btn')
+
+                }
+                $('.techers_next_btn').attr("hidden", true);
+                if (next_item_link) {
+                    $('.techers_next_btn').removeAttr('hidden');
+                }
+
+
+            }
+        });
+
+        $(".techers_next_btn").click(function (event) {
+            event.preventDefault()
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: next_item_link,
+                method: 'GET',
+
+                success: function (data) {
+                    next_item_link = data.next
+                    for (let i = 0; i < data.results.length; i++) {
+                        let content = `<a href="/user/teacher/${data.results[i].id}" class="top-item">
+                                    <div class="top-item__image">
+
+                                            <img src="${data.results[i].image != null ? data.results[i].image : "/static/public/images/banner1.jpg"}" alt="">
+                                    </div>
+                                    <div class="top-item__info">
+                                        <h3>${data.results[i].full_name}</h3>
+                                        <span>${data.results[i].position}</span> <br>
+                                        <strong>{% trans 'Баллы' %}: ${data.results[i].total_ball}</strong>
+                                    </div>
+                                </a>
+                                <br>
+                                `
+                        // $(".top-list").append(content)
+                        $(content).insertBefore('.techers_next_btn')
+
+                    }
+                    $('.techers_next_btn').attr("hidden", true);
+                    if (next_item_link) {
+                        $('.techers_next_btn').removeAttr('hidden');
+                    }
+
+
+                }
+            });
+
+        });
+
+        next_post_url = ''
+        $.ajax({
+            headers: {"X-CSRFToken": "{{csrf_token}}"},
+            url: "{% url 'api_post:list' %}?academic_year={{ request.GET.academic_year }}",
+            method: 'GET',
+
+            success: function (data) {
+                next_post_url = data.next
+                for (let i = 0; i < data.results.length; i++) {
+                    let content = `<tr>
+                                        <th>${$(".table tr").length}</th>
+                                        <td>
+                                            <a href="/post/${data.results[i].id}">
+                                                <div class="table-name">
+                                                    <p>${data.results[i].title}</p>
+                                                    <span>${data.results[i].category_name}</span>
+                                                </div>
+                                            </a>
+                                        </td>
+                                        <td class="text-center">${data.results[i].year}</td>
+                                        <td class="text-center" style="white-space: nowrap">
+                                        ${data.results[i].status === 1 ? "{% trans 'В процессе' %}" : "{% trans 'Одобрено' %}"}
+                                             </td>
+
+                                    </tr>`
+                    $(".table tbody").append(content)
+
+                }
+                $('.posts_next_btn').attr("hidden", true);
+                if (next_post_url) {
+                    $('.posts_next_btn').removeAttr('hidden');
+                }
+
+            }
+        });
+
+        $(".posts_next_btn").click(function (event) {
+            event.preventDefault()
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: next_post_url,
+                method: 'GET',
+
+                success: function (data) {
+                    next_post_url = data.next
+                    for (let i = 0; i < data.results.length; i++) {
+                        let content = `<tr>
+                                        <th>${$(".table tr").length}</th>
+                                        <td>
+                                            <a href="/post/${data.results[i].id}">
+                                                <div class="table-name">
+                                                    <p>${data.results[i].title}</p>
+                                                    <span>${data.results[i].category_name}</span>
+                                                </div>
+                                            </a>
+                                        </td>
+                                        <td class="text-center">${data.results[i].year}</td>
+                                        <td class="text-center" style="white-space: nowrap">
+                                        ${data.results[i].status === 1 ? "{% trans 'В процессе' %}" : "{% trans 'Одобрено' %}"}
+                                             </td>
+
+                                    </tr>`
+                        $(".table tbody").append(content)
+
+                    }
+                    $('.posts_next_btn').attr("hidden", true);
+                    if (next_post_url) {
+                        $('.posts_next_btn').removeAttr('hidden');
+                    }
+
+                }
+            });
+
+        });
+
+
+        const chart_category = Highcharts.chart('pie', {
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: "{% trans 'Статистика по категориям'%}"
+            },
+            tooltip: {
+                pointFormat: '<b>{point.y:.1f}</b>'
+            },
+            accessibility: {
+                point: {
+                    valueSuffix: '%'
+                }
+            },
+
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                        events: {
+                            click: function () {
+                                location.href = this.options.url;
+                            }
+                        }
+                    }
+                },
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: false,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                    }
+                }
+            },
+            colors: ['#FF974A', '#0062FF', '#FFC542', '#3DD598'],
+            series: [{
+                id: 'category_series',
+                name: 'Brands',
+                colorByPoint: true,
+
+            }]
+        });
+        {% get_current_language as LANGUAGE_CODE %}
+        var cur_lang = "{{ LANGUAGE_CODE }}"
+
+        $.ajax({
+            headers: {"X-CSRFToken": "{{csrf_token}}"},
+            url: "{% url 'api_category:report_group' %}?academic_year={{ request.GET.academic_year }}",
+            method: 'GET',
+
+            success: function (data) {
+                let ball = [];
+
+                for (i = 0; i < data.length; i++) {
+                    /*if (cur_lang == "ru") {
+                        ball.push({name: data[i].name_ru, y: data[i].ball});
+                    } else if (cur_lang == "en") {
+                        ball.push({name: data[i].name_en, y: data[i].ball});
+                    } else {
+                        ball.push({name: data[i].name_uz, y: data[i].ball});
+                    }*/
+                    let column_color = '#f7a35c'
+                    if (data[i].id == 1) {
+                        column_color = '#90ed7d'
+                    }
+                    if (data[i].id == 2) {
+                        column_color = '#7cb5ec'
+                    }
+
+                    ball.push({
+                        name: data[i].name,
+                        y: data[i].ball,
+                        url: `/post/list?group=${data[i].id}`,
+                        color: column_color
+                    });
+                    if (data[i].id == 3 && data[i].minus_ball > 0) {
+
+                        column_color = '#ff0000'
+                        ball.push({
+                            name: "Нарушения",
+                            y: data[i].minus_ball,
+                            url: `/post/list?group=${data[i].id}`,
+                            color: column_color
+                        });
+                    }
+                }
+                chart_category.get("category_series").update({data: ball});
+            }
+        });
+
+
+        init_cur_year_report();
+
+        var element = document.getElementById("index").classList.add("menu__item_active");
+
+        $("#yearInput").on('change', function (e) {
+            let academic_year = $("#yearInput").val();
+            window.location.href = `?academic_year=${academic_year}`;
+
+
+        });
+
+        function init_cur_year_report() {
+            const chart_posts = Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: '{% trans 'Статистика' %}'
+                },
+                subtitle: {
+                    // text: 'Plain'
+                },
+                xAxis: {
+                    categories: [
+                        {% for i in month_list %}
+                            '{{ i }}',
+                        {% endfor %}
+                    ]
+                },
+                yAxis: {
+                    title: {
+                        text: 'кол-во баллов'
+                    }
+                },
+                colors: ["#7cb5ec"],
+                series: [{
+                    name: 'кол-во баллов',
+                    id: 'ball',
+                    type: 'column',
+                    colorByPoint: true,
+                    showInLegend: false
+                }],
+                plotOptions: {
+                    column: {
+                        stacking: 'normal'
+                    }
+                },
+            });
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: "{% url 'api_post:report' %}?academic_year={{ request.GET.academic_year }}",
+                method: 'GET',
+
+                success: function (data) {
+                    let ball = [];
+
+                    for (i = 0; i < data.length; i++) {
+
+                        let column_color = '#f7a35c'
+                        if (data[i].id == -3) {
+                            column_color = '#ff0000'
+                        }
+                        if (data[i].id == 1) {
+                            column_color = '#90ed7d'
+                        }
+                        if (data[i].id == 2) {
+                            column_color = '#7cb5ec'
+                        }
+
+
+                        chart_posts.addSeries({
+                            "color": column_color,
+                            "name": data[i].id == -3 ? data[i].group_name + "(нарушения)" : data[i].group_name,
+                            "data": data[i].total_balls,
+                            "stack": Math.abs(data[i].id)
+                        })
+
+                        {#ball.push(data[i].ball);#}
+
+                    }
+                    {#chart_posts.get("ball").update({data: ball});#}
+                }
+            });
+        }
+
+        function init_all_year_report() {
+            teacher_chart = Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                tooltip: {
+                    formatter: function () {
+                        str = "";
+                        for (let i = 0; i < this.point.series.userOptions.categories.length; i++) {
+                            if (this.point.series.userOptions.categories[i].balls[this.point.index] != 0) {
+                                str += this.point.series.userOptions.categories[i].name + ": " + this.point.series.userOptions.categories[i].balls[this.point.index] + "<br>";
+                            }
+                        }
+
+                        return str;
+                    }
+                },
+                title: {
+                    text: '{% trans 'Статистика' %}'
+                },
+                xAxis: {
+                    id: "years",
+                    categories: [],
+                    title: {
+                        text: '{% trans 'Год' %}'
+                    }
+                },
+                yAxis: {
+                    id: 'teacher_y_axis',
+                    title: {
+                        text: '{% trans 'Количество баллов' %}'
+                    },
+                    stackLabels: {
+                        enabled: true,
+                        style: {
+                            fontWeight: 'bold',
+                            color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                        }
+                    }
+                },
+                legend: {
+                    reversed: true
+                },
+                plotOptions: {
+                    series: {
+                        stacking: 'normal'
+                    }
+                },
+                colors: ['#FF974A', '#0062FF', '#FFC542', '#3DD598'],
+                series: []
+            });
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: "{% url 'api_user:total_report' %}",
+                method: 'GET',
+
+                success: function (data) {
+                    let years = [];
+
+                    for (let i = 0; i < data.academic_years.length; i++) {
+                        years.push(`${data.academic_years[i]}`);
+                    }
+                    for (let i = 0; i < data.group.length; i++) {
+                        let column_color = '#f7a35c'
+                        if (data.group[i].id == 1) {
+                            column_color = '#90ed7d'
+                        }
+                        if (data.group[i].id == 2) {
+                            column_color = '#7cb5ec'
+                        }
+
+
+                        teacher_chart.addSeries({
+                            "color": column_color,
+                            "name": data.group[i].name,
+                            "data": data.group[i].total_balls,
+                            "categories": data.group[i].category
+                        })
+                    }
+                    teacher_chart.get("years").update({categories: years});
+
+                    let teacher_plot_lines = [{
+                        color: '#4CAF50',
+                        width: 1,
+                        dashStyle: 'LongDashDot',
+                        zIndex: 3,
+                        value: data.high_line
+                    }, {
+                        color: '#FF0000',
+                        width: 1,
+                        dashStyle: 'LongDashDot',
+                        zIndex: 3,
+                        value: data.low_line
+                    }]
+                    {#console.log(data)#}
+                    teacher_chart.get("teacher_y_axis").update({plotLines: teacher_plot_lines});
+                }
+
+            });
+        }
+
+        $("#reportType").on('change', function (e) {
+            if ($("#reportType").val() === "2")
+                init_all_year_report();
+            else
+                init_cur_year_report();
+
+
+        })
+    </script>
+{% endblock %}

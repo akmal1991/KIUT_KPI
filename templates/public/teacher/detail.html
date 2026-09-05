@@ -1,0 +1,283 @@
+{% extends 'base_public.html' %}
+{% load i18n %}
+{% load category_coef %}
+{% load static %}
+
+{% block content %}
+    <section class="profile">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="profile-side">
+                        <form action="">
+                            <div class="form-group">
+                                <label for="selectTeacher">{% trans 'Преподаватели' %}</label>
+                                <select class="form-control selectpicker" name="teacher" id="selectTeacher"
+                                        data-live-search="true" title="{% trans 'Выберите' %}">
+                                    {% for teach in teacher_list %}
+                                        {% if teach.id == teacher.id %}
+                                            <option value="{{ teach.id }}" selected>{{ teach.get_full_name }}</option>
+                                        {% else %}
+                                            <option value="{{ teach.id }}">{{ teach.get_full_name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                        <div class="profile-info">
+                            <div class="profile-info__image">
+                                {% if teacher.image %}
+                                    <img src="{{ teacher.image.url }}" alt="">
+                                {% else %}
+                                    <img src="{% static 'public/images/banner1.jpg' %}" alt="">
+                                {% endif %}
+
+                            </div>
+                            <div class="profile-info__main">
+                                <h3>{{ teacher.get_full_name }}</h3>
+                                <span>{% trans 'Должность' %}: {{ teacher.position|default_if_none:'' }}</span> <br>
+                                <span>{% trans 'Общий рейтинг' %}: {{ teacher.get_total_ball }}</span> <br>
+                                <span>{% trans 'Дата регистрации' %}:<br> {{ teacher.created.date }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="profile-main">
+                        <div class="profile-title">
+                            <h2>{{ teacher.get_full_name }}</h2>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <figure class="highcharts-figure">
+                                    <div id="detailChart"></div>
+                                </figure>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="statistics">
+                                    <div class="categories">
+                                        <h3>{% trans 'Категории' %}</h3>
+                                        <ul>
+                                            {% for category_obj in category_list %}
+                                                <li>{{ category_obj.category.name }}<strong> ( {{ category_obj.count }}
+                                                    )</strong></li>
+                                            {% endfor %}
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="works-table">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3>{% trans 'Статистика' %}</h3>
+                                    </div>
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-2">
+                                        <select id="yearInput" class="form-control selectpicker"
+                                                style="width: auto; display: inline-block;">
+                                            {% for academic_year in academic_year_list %}
+                                                {% if request.GET.academic_year %}
+                                                    <option value="{{ academic_year.id }}"
+                                                            {% if academic_year.id == request.GET.academic_year|add:"0" %}
+                                                            selected
+                                                            {% endif %}>{{ academic_year.years }}</option>
+                                                {% else %}
+                                                    <option value="{{ academic_year.id }}"
+                                                            {% if academic_year.id == current_academic_year %}
+                                                            selected
+                                                            {% endif %}>{{ academic_year.years }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="works-table p-0 overflow-auto" style="height: 400px">
+                            <table class="table">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th width="1%">#</th>
+                                    <th width="300px">{% trans 'Название' %}</th>
+                                    <th width="1%" class="text-center">{% trans 'Баллы' %}</th>
+                                    <th width="1%" class="text-center">{% trans 'Дата' %}</th>
+                                    <th class="text-center" width="1%">{% trans 'Статуc' %}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for post in post_list %}
+
+                                    <tr>
+                                        <th>{{ forloop.counter }}</th>
+                                        <td>
+                                            <div class="table-name">
+                                                <p>{{ post.title }}</p>
+                                                <span>{{ post.category.name }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{ post.category|get_coef_for_year:post.academic_years }}</td>
+                                        <td class="text-center" style="white-space: nowrap">
+                                            <div class="table-name">
+                                                <p>{{ post.date }}</p>
+                                                <span>{{ post.academic_years.years }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center" style="white-space: nowrap">{% if post.status == 1 %}
+                                            {% trans 'В процессе' %} {% elif post.status == 2 %}
+                                            {% trans 'Одобрено' %} {% endif %}</td>
+                                    </tr>
+
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+
+{% block js %}
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script>
+
+        $("#yearInput").on('change', function (e) {
+            let academic_year = $("#yearInput").val();
+            window.location.href = `?academic_year=${academic_year}`;
+        });
+
+        $(function () {
+            $('.selectpicker').selectpicker();
+        });
+
+        teacher_chart = Highcharts.chart('detailChart', {
+            chart: {
+                type: 'column'
+            },
+            tooltip: {
+                formatter: function () {
+                    str = "";
+                    for (let i = 0; i < this.point.series.userOptions.categories.length; i++) {
+                        if (this.point.series.userOptions.categories[i].balls[this.point.index] != 0) {
+                            str += this.point.series.userOptions.categories[i].name + ": " + this.point.series.userOptions.categories[i].balls[this.point.index] + "<br>";
+                        }
+                    }
+
+                    return str;
+                }
+            },
+            title: {
+                text: '{% trans 'Статистика' %}'
+            },
+            xAxis: {
+                id: "years",
+                categories: [],
+                title: {
+                    text: '{% trans 'Год' %}'
+                }
+            },
+            yAxis: {
+                id: 'teacher_y_axis',
+                title: {
+                    text: '{% trans 'Количество баллов' %}'
+                },
+                stackLabels: {
+                    enabled: true,
+                    style: {
+                        fontWeight: 'bold',
+                        color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                    }
+                }
+            },
+            legend: {
+                reversed: true
+            },
+            plotOptions: {
+                series: {
+                    stacking: 'normal'
+                }
+            },
+            series: []
+        });
+
+        $.ajax({
+            headers: {"X-CSRFToken": "{{csrf_token}}"},
+            url: "{% url 'api_user:teacher_report' teacher.id %}",
+            method: 'GET',
+
+            success: function (data) {
+                let years = [];
+
+                for (let i = 0; i < data.academic_years.length; i++) {
+                    years.push(`${data.academic_years[i]}`);
+                }
+                for (let i = 0; i < data.group.length; i++) {
+                    let column_color = '#7cb5ec'
+                    if (data.group[i].id == 1) {
+                        column_color = '#f7a35c'
+                    }
+                    if (data.group[i].id == 2) {
+                        column_color = '#90ed7d'
+                    }
+
+
+                    teacher_chart.addSeries({
+                        "color": column_color,
+                        "name": data.group[i].name,
+                        "data": data.group[i].total_balls,
+                        "categories": data.group[i].category
+                    })
+                }
+                teacher_chart.get("years").update({categories: years});
+
+                let teacher_plot_lines = [{
+                    color: '#4CAF50',
+                    width: 1,
+                    dashStyle: 'LongDashDot',
+                    zIndex: 3,
+                    value: data.high_line,
+                    label: {
+                        text: `${data.high_line}`, // Label for the red line with bal value
+                        align: 'left',
+                        style: {
+                            color: '#4CAF50'
+                        }
+                    }
+                }, {
+                    color: '#FF0000', // Red color
+                    width: 1,
+                    dashStyle: 'LongDashDot',
+                    zIndex: 3,
+                    value: data.low_line, // The value where the red line should appear
+                    label: {
+                        text: `${data.low_line}`, // Label for the red line with bal value
+                        align: 'left',
+                        style: {
+                            color: '#FF0000'
+                        }
+                    }
+                }]
+                {#console.log(data)#}
+                teacher_chart.get("teacher_y_axis").update({plotLines: teacher_plot_lines});
+            }
+
+        });
+
+        $("#selectYear").change(function () {
+            window.location.href = `{% url 'user_public:teacher_detail' teacher.id %}?year=${$(this).val()}`;
+        });
+        $("#selectTeacher").change(function () {
+            window.location.href = `/user/teacher/${$(this).val()}`;
+        });
+    </script>
+{% endblock %}

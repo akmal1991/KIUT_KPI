@@ -1,0 +1,198 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="main-title d-flex align-items-center justify-content-between">
+            <h1 class="">Кафедры</h1>
+        </div>
+
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'index_admin:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Кафедры</li>
+        </ol>
+
+
+        <div class="main-table">
+            <table class="interior-table ">
+                <thead>
+                    <tr>
+                        <th width="1%">№</th>
+                        <th width="200px">Название</th>
+
+                    </tr>
+                </thead>
+                <tbody class="tbody">
+                    {% for division in division_list %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:page_obj.start_index  }}</td>
+                        <td>{{ division.name_ru }}</td>
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        <br>
+        {% load paginator %}
+        {% get_public_pagination %}
+        </div>
+
+    </div>
+{% endblock %}
+
+
+{% block modals %}
+    <!-- Modals -->
+    <div id="openAddDepartment" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Добавить</h2>
+            </div>
+            <div class="popup-content">
+                <form action="">
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <ul class="nav nav-pills mb-3" id="addTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="addTab1" data-toggle="pill" href="#addPills1" role="tab" aria-selected="true">Uz</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="addTab2" data-toggle="pill" href="#addPills2" role="tab" aria-selected="false">Ru</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="addTab3" data-toggle="pill" href="#addPills3" role="tab" aria-selected="false">En</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="addPills">
+                                <div class="tab-pane fade show active" id="addPills1" role="tabpanel">
+                                    <div class="form-group">
+                                        <label for="name_uz">Название(uz):</label>
+                                        <input type="text" class="form-control" name="name_uz" id="name_uz">
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="addPills2" role="tabpanel">
+                                    <div class="form-group">
+                                        <label for="name_ru">Название(ru):</label>
+                                        <input type="text" class="form-control" name="name_ru" id="name_ru" required>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="addPills3" role="tabpanel">
+                                    <div class="form-group">
+                                        <label for="name_en">Название(en):</label>
+                                        <input type="text" class="form-control" name="name_en" id="name_en">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-avatar">
+                                <div class="avatar-upload">
+                                    <div class="avatar-edit">
+                                        <input type="file" id="imageUpload" accept=".png, .jpg, .jpeg">
+                                        <label for="imageUpload"><i class="fas fa-pencil-alt"></i></label>
+                                    </div>
+                                    <div class="avatar-preview">
+                                        <div id="imagePreview" style="background-image: url({% static 'assets/img/avatar.png' %});">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="saveAddDepartment" href="#" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="openEditDepartment" class="white-popup white-popup__middle mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Редактировать</h2>
+            </div>
+            <div class="popup-content">
+                <form action="">
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <ul class="nav nav-pills mb-3" id="editTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="editTab1" data-toggle="pill" href="#editPills1" role="tab" aria-selected="true">Uz</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="editTab2" data-toggle="pill" href="#editPills2" role="tab" aria-selected="false">Ru</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="editTab3" data-toggle="pill" href="#editPills3" role="tab" aria-selected="false">En</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="editPills">
+                                <div class="tab-pane fade show active" id="editPills1" role="tabpanel">
+                                    <div class="form-group">
+                                        <label for="name_uzE">Название(uz):</label>
+                                        <input type="text" class="form-control" name="name_uzE" id="name_uzE">
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="editPills2" role="tabpanel">
+                                    <div class="form-group">
+                                        <label for="name_ruE">Название(ru):</label>
+                                        <input type="text" class="form-control" name="name_ruE" id="name_ruE">
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="editPills3" role="tabpanel">
+                                    <div class="form-group">
+                                        <label for="name_enE">Название(en):</label>
+                                        <input type="text" class="form-control" name="name_enE" id="name_enE">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-5">
+                            <div class="form-avatar">
+                                <div class="avatar-upload">
+                                    <div class="avatar-edit">
+                                        <input type="file" id="imageUploadE" accept=".png, .jpg, .jpeg">
+                                        <label for="imageUploadE"><i class="fas fa-pencil-alt"></i></label>
+                                    </div>
+                                    <div class="avatar-preview">
+                                        <div id="imagePreviewE" style="background-image: url({% static 'assets/img/avatar.png' %});">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="saveEditDepartment" href="#" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="openDeleteDepartment" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Удалить</h2>
+            </div>
+            <div class="popup-content">
+                <p>Вы действительно хотите удалить кафедру ?</p>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="deleteDepartmentBtn" href="#" class="btn btn-delete">Удалить</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+
+{% endblock %}

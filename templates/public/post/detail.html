@@ -1,0 +1,54 @@
+{% extends 'base_public.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+    <section class="profile">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="profile-side">
+                        <div class="profile-info">
+                            <div class="profile-info__image">
+                                {% if post.teacher.image %}
+                                    <img src="{{ post.teacher.image.url }}" alt="">
+                                {% else %}
+                                    <img src="{% static 'public/images/banner1.jpg' %}" alt="">
+                                {% endif %}
+
+                            </div>
+                            <div class="profile-info__main">
+                                <h3>{{ post.teacher.get_full_name }}</h3>
+                                <span>{{ post.teacher.position }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="profile-main">
+                        <div class="profile-title">
+                            <h2>{{ post.title }}</h2>
+                        </div>
+                        <div class="profile-content">
+                            {{ post.body | safe }}
+                        </div>
+                        <div class="profile-footer">
+                            {% if post.indexing %}
+                                <p><strong>{% trans 'Индексация' %}:</strong> {{ post.indexing }}</p>
+                            {% endif %}
+                            <p><strong>{% trans 'Статус' %}:</strong> {% if post.status == 1 %} {% trans 'В процессе' %} {% elif post.status == 2 %} {% trans 'Одобрено' %} {% endif %}</p>
+                            <p><strong>{% trans 'Категория' %}:</strong> {{ post.category.name }}</p>
+                            <p><strong>{% trans 'Дата создания' %}:</strong> {{ post.date }}</p>
+                            <p><strong>{% trans 'Дата добавления' %}:</strong> {{ post.created.date }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+
+{% block js %}
+
+{% endblock %}

@@ -1,0 +1,250 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-20 07:35+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/administrator/index.html:85 templates/public/index.html:249
+msgid "Cтатистика по категориям"
+msgstr "Category statistics"
+
+#: templates/administrator/login.html:57 templates/base_public.html:113
+msgid "Все права защищены"
+msgstr "All rights reserved"
+
+#: templates/base_public.html:49
+msgid "Главная"
+msgstr "Home"
+
+#: templates/base_public.html:50 templates/public/index.html:51
+msgid "Последняя активность"
+msgstr "Last Activity"
+
+#: templates/base_public.html:51 templates/base_public.html:101
+#: templates/public/division/detail.html:153 templates/public/index.html:355
+#: templates/public/index.html:437 templates/public/post/list.html:10
+#: templates/public/teacher/detail.html:79
+#: templates/public/teacher/detail.html:154
+msgid "Статистика"
+msgstr "Statistics"
+
+#: templates/base_public.html:52 templates/base_public.html:104
+#: templates/public/division/detail.html:12
+#: templates/public/division/list.html:38
+msgid "Кафедры"
+msgstr "Chairs"
+
+#: templates/base_public.html:53 templates/base_public.html:107
+#: templates/public/division/list.html:45
+#: templates/public/teacher/detail.html:21
+#: templates/public/teacher/list.html:62
+msgid "Преподаватели"
+msgstr "Teachers"
+
+#: templates/public/division/detail.html:35
+#: templates/public/teacher/detail.html:46
+msgid "Общий рейтинг"
+msgstr "Overall rating"
+
+#: templates/public/division/detail.html:55
+#: templates/public/teacher/detail.html:66
+msgid "Категории"
+msgstr "Categories"
+
+#: templates/public/division/detail.html:72
+#: templates/public/division/list.html:44 templates/public/index.html:57
+#: templates/public/post/list.html:27 templates/public/teacher/detail.html:84
+msgid "Название"
+msgstr "Title"
+
+#: templates/public/division/detail.html:73 templates/public/index.html:108
+#: templates/public/index.html:144 templates/public/post/list.html:28
+#: templates/public/teacher/detail.html:85
+#: templates/public/teacher/list.html:73
+msgid "Баллы"
+msgstr "Scores"
+
+#: templates/public/division/detail.html:74
+#: templates/public/teacher/detail.html:86
+msgid "Дата"
+msgstr "Date"
+
+#: templates/public/division/detail.html:75 templates/public/index.html:59
+#: templates/public/teacher/detail.html:87
+msgid "Статуc"
+msgstr "Status"
+
+#: templates/public/division/detail.html:91 templates/public/index.html:185
+#: templates/public/index.html:223 templates/public/post/detail.html:39
+#: templates/public/teacher/detail.html:108
+msgid "В процессе"
+msgstr "In process"
+
+#: templates/public/division/detail.html:91 templates/public/index.html:185
+#: templates/public/index.html:223 templates/public/post/detail.html:39
+#: templates/public/teacher/detail.html:108
+msgid "Одобрено"
+msgstr "Approved"
+
+#: templates/public/division/detail.html:160 templates/public/index.html:58
+#: templates/public/index.html:443 templates/public/teacher/detail.html:160
+msgid "Год"
+msgstr "Year"
+
+#: templates/public/division/detail.html:167 templates/public/index.html:449
+#: templates/public/post/static_scientific.html:104
+#: templates/public/post/static_scientific.html:150
+#: templates/public/teacher/detail.html:166
+msgid "Количество баллов"
+msgstr "Number of points"
+
+#: templates/public/division/list.html:28
+msgid "Название кафедры"
+msgstr "Name of the department"
+
+#: templates/public/division/list.html:31 templates/public/teacher/list.html:55
+msgid "Фильтр"
+msgstr "Filter"
+
+#: templates/public/division/list.html:46
+msgid "Академическая"
+msgstr "Academic"
+
+#: templates/public/division/list.html:47
+msgid "Организационная"
+msgstr "Organizational"
+
+#: templates/public/division/list.html:48
+msgid "Научная деятельность"
+msgstr "Scientific activity"
+
+#: templates/public/division/list.html:49
+msgid "Общее"
+msgstr "General"
+
+#: templates/public/index.html:30
+msgid "Топ рейтинг"
+msgstr "Top rating"
+
+#: templates/public/index.html:32 templates/public/index.html:65
+msgid "Ещё"
+msgstr "More"
+
+#: templates/public/index.html:40
+msgid "Годовая статистика"
+msgstr "Annual statistics"
+
+#: templates/public/index.html:41
+msgid "По академическим годам"
+msgstr "By academic years"
+
+#: templates/public/post/detail.html:37
+msgid "Индексация"
+msgstr "Indexing"
+
+#: templates/public/post/detail.html:39 templates/public/teacher/list.html:71
+msgid "Статус"
+msgstr "Status"
+
+#: templates/public/post/detail.html:40
+msgid "Категория"
+msgstr "Category"
+
+#: templates/public/post/detail.html:41 templates/public/post/list.html:29
+msgid "Дата создания"
+msgstr "Date of creation"
+
+#: templates/public/post/detail.html:42
+msgid "Дата добавления"
+msgstr "Date added"
+
+#: templates/public/post/list.html:14
+msgid "Выбрать по дате..."
+msgstr "Select by date..."
+
+#: templates/public/post/list.html:15
+msgid "Дата создании по убыванию"
+msgstr "Creation date descending"
+
+#: templates/public/post/list.html:16
+msgid "Дата создании по возрастанию"
+msgstr "Creation date ascending"
+
+#: templates/public/post/list.html:17
+msgid "Дата публикации по убыванию"
+msgstr "Publication date descending"
+
+#: templates/public/post/list.html:18
+msgid "Дата публикации по возрастанию"
+msgstr "Publication date ascending"
+
+#: templates/public/post/list.html:30
+msgid "Дата публикации"
+msgstr "Publication date"
+
+#: templates/public/post/static_scientific.html:43
+msgid "Статистика ППС по KPI"
+msgstr "PPC statistics by KPI"
+
+#: templates/public/post/static_scientific.html:89
+msgid "Статистика научной деятельности"
+msgstr "Statistics of scientific activity"
+
+#: templates/public/post/static_scientific.html:92
+msgid "Научные инновации"
+msgstr "Scientific innovations"
+
+#: templates/public/teacher/detail.html:23
+msgid "Выберите"
+msgstr "Choose"
+
+#: templates/public/teacher/detail.html:45
+msgid "Должность"
+msgstr "Post"
+
+#: templates/public/teacher/detail.html:47
+#: templates/public/teacher/list.html:72
+msgid "Дата регистрации"
+msgstr "Date of registration"
+
+#: templates/public/teacher/list.html:32 templates/public/teacher/list.html:70
+msgid "Кафедра"
+msgstr "Department"
+
+#: templates/public/teacher/list.html:33
+msgid "Все"
+msgstr "All"
+
+#: templates/public/teacher/list.html:40 templates/public/teacher/list.html:69
+msgid "Ф.И.О"
+msgstr "F.I.O"
+
+#: templates/public/teacher/list.html:47
+msgid "Ученые степени"
+msgstr "Academic degrees"
+
+#: ytit_django/settings.py:71
+msgid "Русский"
+msgstr "Russian"
+
+#: ytit_django/settings.py:72
+msgid "English"
+msgstr "English"
+
+#: ytit_django/settings.py:73
+msgid "O'zbekcha"
+msgstr "O'zbekcha"

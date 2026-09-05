@@ -1,0 +1,250 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-20 07:35+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: templates/administrator/index.html:85 templates/public/index.html:249
+msgid "Cтатистика по категориям"
+msgstr "Kategoriyalar statistikasi"
+
+#: templates/administrator/login.html:57 templates/base_public.html:113
+msgid "Все права защищены"
+msgstr "Barcha huquqlar himoyalangan"
+
+#: templates/base_public.html:49
+msgid "Главная"
+msgstr "Asosiy"
+
+#: templates/base_public.html:50 templates/public/index.html:51
+msgid "Последняя активность"
+msgstr "Oxirgi faoliyat"
+
+#: templates/base_public.html:51 templates/base_public.html:101
+#: templates/public/division/detail.html:153 templates/public/index.html:355
+#: templates/public/index.html:437 templates/public/post/list.html:10
+#: templates/public/teacher/detail.html:79
+#: templates/public/teacher/detail.html:154
+msgid "Статистика"
+msgstr "Statistika"
+
+#: templates/base_public.html:52 templates/base_public.html:104
+#: templates/public/division/detail.html:12
+#: templates/public/division/list.html:38
+msgid "Кафедры"
+msgstr "Kafedralar"
+
+#: templates/base_public.html:53 templates/base_public.html:107
+#: templates/public/division/list.html:45
+#: templates/public/teacher/detail.html:21
+#: templates/public/teacher/list.html:62
+msgid "Преподаватели"
+msgstr "O'qituvchilar"
+
+#: templates/public/division/detail.html:35
+#: templates/public/teacher/detail.html:46
+msgid "Общий рейтинг"
+msgstr "Umumiy reyting"
+
+#: templates/public/division/detail.html:55
+#: templates/public/teacher/detail.html:66
+msgid "Категории"
+msgstr "Kategoriyalar"
+
+#: templates/public/division/detail.html:72
+#: templates/public/division/list.html:44 templates/public/index.html:57
+#: templates/public/post/list.html:27 templates/public/teacher/detail.html:84
+msgid "Название"
+msgstr "Nomi"
+
+#: templates/public/division/detail.html:73 templates/public/index.html:108
+#: templates/public/index.html:144 templates/public/post/list.html:28
+#: templates/public/teacher/detail.html:85
+#: templates/public/teacher/list.html:73
+msgid "Баллы"
+msgstr "Ballar"
+
+#: templates/public/division/detail.html:74
+#: templates/public/teacher/detail.html:86
+msgid "Дата"
+msgstr "Sana"
+
+#: templates/public/division/detail.html:75 templates/public/index.html:59
+#: templates/public/teacher/detail.html:87
+msgid "Статуc"
+msgstr "Holat"
+
+#: templates/public/division/detail.html:91 templates/public/index.html:185
+#: templates/public/index.html:223 templates/public/post/detail.html:39
+#: templates/public/teacher/detail.html:108
+msgid "В процессе"
+msgstr "Jarayonda"
+
+#: templates/public/division/detail.html:91 templates/public/index.html:185
+#: templates/public/index.html:223 templates/public/post/detail.html:39
+#: templates/public/teacher/detail.html:108
+msgid "Одобрено"
+msgstr "Tasdiqlangan"
+
+#: templates/public/division/detail.html:160 templates/public/index.html:58
+#: templates/public/index.html:443 templates/public/teacher/detail.html:160
+msgid "Год"
+msgstr "Yil"
+
+#: templates/public/division/detail.html:167 templates/public/index.html:449
+#: templates/public/post/static_scientific.html:104
+#: templates/public/post/static_scientific.html:150
+#: templates/public/teacher/detail.html:166
+msgid "Количество баллов"
+msgstr "Ballar soni"
+
+#: templates/public/division/list.html:28
+msgid "Название кафедры"
+msgstr "Kafedra nomi"
+
+#: templates/public/division/list.html:31 templates/public/teacher/list.html:55
+msgid "Фильтр"
+msgstr "Filtr"
+
+#: templates/public/division/list.html:46
+msgid "Академическая"
+msgstr "Akademik"
+
+#: templates/public/division/list.html:47
+msgid "Организационная"
+msgstr "Tashkiliy"
+
+#: templates/public/division/list.html:48
+msgid "Научная деятельность"
+msgstr "Ilmiy faoliyat"
+
+#: templates/public/division/list.html:49
+msgid "Общее"
+msgstr "Umumiy"
+
+#: templates/public/index.html:30
+msgid "Топ рейтинг"
+msgstr "Reyting"
+
+#: templates/public/index.html:32 templates/public/index.html:65
+msgid "Ещё"
+msgstr "Boshqa"
+
+#: templates/public/index.html:40
+msgid "Годовая статистика"
+msgstr "Yillik statistika"
+
+#: templates/public/index.html:41
+msgid "По академическим годам"
+msgstr "Akademik yillar bo'yicha"
+
+#: templates/public/post/detail.html:37
+msgid "Индексация"
+msgstr "Indeksatsiya"
+
+#: templates/public/post/detail.html:39 templates/public/teacher/list.html:71
+msgid "Статус"
+msgstr "Holat"
+
+#: templates/public/post/detail.html:40
+msgid "Категория"
+msgstr "Kategoriya"
+
+#: templates/public/post/detail.html:41 templates/public/post/list.html:29
+msgid "Дата создания"
+msgstr "Yaratilgan sana"
+
+#: templates/public/post/detail.html:42
+msgid "Дата добавления"
+msgstr "Qo'shilgan sana"
+
+#: templates/public/post/list.html:14
+msgid "Выбрать по дате..."
+msgstr "Sana bo'yicha tanlang..."
+
+#: templates/public/post/list.html:15
+msgid "Дата создании по убыванию"
+msgstr "Yaratilgan sananing kamayish tartibida"
+
+#: templates/public/post/list.html:16
+msgid "Дата создании по возрастанию"
+msgstr "Yaratilgan sana ortish tartibida"
+
+#: templates/public/post/list.html:17
+msgid "Дата публикации по убыванию"
+msgstr "Nashr sanasi kamayish tartibida"
+
+#: templates/public/post/list.html:18
+msgid "Дата публикации по возрастанию"
+msgstr "Nashr sanasi ortish tartibida"
+
+#: templates/public/post/list.html:30
+msgid "Дата публикации"
+msgstr "Nashr qilingan sana"
+
+#: templates/public/post/static_scientific.html:43
+msgid "Статистика ППС по KPI"
+msgstr "KPI bo'yicha PPC statistikasi"
+
+#: templates/public/post/static_scientific.html:89
+msgid "Статистика научной деятельности"
+msgstr "Ilmiy faoliyat statistikasi"
+
+#: templates/public/post/static_scientific.html:92
+msgid "Научные инновации"
+msgstr "Ilmiy yangiliklar"
+
+#: templates/public/teacher/detail.html:23
+msgid "Выберите"
+msgstr "Tanlang"
+
+#: templates/public/teacher/detail.html:45
+msgid "Должность"
+msgstr "Lavozim"
+
+#: templates/public/teacher/detail.html:47
+#: templates/public/teacher/list.html:72
+msgid "Дата регистрации"
+msgstr "Ro'yxatga olingan sana"
+
+#: templates/public/teacher/list.html:32 templates/public/teacher/list.html:70
+msgid "Кафедра"
+msgstr "Kafedra"
+
+#: templates/public/teacher/list.html:33
+msgid "Все"
+msgstr "Hammasi"
+
+#: templates/public/teacher/list.html:40 templates/public/teacher/list.html:69
+msgid "Ф.И.О"
+msgstr "F. I. O"
+
+#: templates/public/teacher/list.html:47
+msgid "Ученые степени"
+msgstr "Ilmiy darajalar"
+
+#: ytit_django/settings.py:71
+msgid "Русский"
+msgstr "Rus"
+
+#: ytit_django/settings.py:72
+msgid "English"
+msgstr "Ingliz tili"
+
+#: ytit_django/settings.py:73
+msgid "O'zbekcha"
+msgstr "O'zbekcha"

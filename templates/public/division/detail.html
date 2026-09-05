@@ -1,0 +1,213 @@
+{% extends 'base_public.html' %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+    <section class="profile">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="profile-side">
+                        <form action="">
+                            <div class="form-group">
+                                <label for="selectDvision">{% trans 'Кафедры' %}</label>
+                                <select class="form-control selectpicker" name="division" id="selectDvision">
+                                    {% for div in division_list %}
+                                        {% if div.id == division.id %}
+                                            <option value="{{ div.id }}" selected>{{ div.name }}</option>
+                                        {% else %}
+                                            <option value="{{ div.id }}">{{ div.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                        <div class="profile-info">
+                            <div class="profile-info__image">
+                                {% if division.image %}
+                                    <img src="{{ division.image.url }}" alt="">
+                                {% else %}
+                                    <img src="{% static 'public/images/banner1.jpg' %}" alt="">
+                                {% endif %}
+
+                            </div>
+                            <div class="profile-info__main">
+                                <h3>{{ division.name }}</h3>
+                                <span>{% trans 'Общий рейтинг' %}: {{ division.get_total_ball }}</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="profile-main">
+                        <div class="profile-title">
+                            <h2>{{ division.name }}</h2>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <figure class="highcharts-figure">
+                                    <div id="detailChart"></div>
+                                </figure>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="statistics">
+                                    <div class="categories">
+                                        <h3>{% trans 'Категории' %}</h3>
+                                        <ul>
+                                            {% for category in category_list %}
+                                                <li>{{ category.category.name }}<strong> ( {{ category.count }}
+                                                    )</strong></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="works-table">
+                            <h3>Статьи</h3>
+                            <div class="works-table p-0 overflow-auto" style="height: 400px">
+                                <table class="table">
+                                    <thead class="thead-light">
+                                    <tr>
+                                        <th width="1%">#</th>
+                                        <th width="300px">{% trans 'Название' %}</th>
+                                        <th width="1%">{% trans 'Баллы' %}</th>
+                                        <th width="1%">{% trans 'Дата' %}</th>
+                                        <th class="text-center" width="1%">{% trans 'Статуc' %}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for post in post_list %}
+                                        <tr>
+
+                                            <th>{{ forloop.counter }}</th>
+                                            <td>
+                                                <div class="table-name">
+                                                    <p>{{ post.title }}</p>
+                                                    <span>{{ post.category.name }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">{{ post.category.get_coef }}</td>
+                                            <td class="text-center" style="white-space: nowrap">{{ post.date }}</td>
+                                            <td class="text-center" style="white-space: nowrap">
+                                                {% if post.status == 1 %}
+                                                    {% trans 'В процессе' %} {% elif post.status == 2 %}
+                                                    {% trans 'Одобрено' %} {% endif %}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+{% endblock %}
+
+
+{% block js %}
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script>
+        $(function () {
+            $('.selectpicker').selectpicker();
+        });
+
+        division_chart = Highcharts.chart('detailChart', {
+            chart: {
+                type: 'column'
+            },
+            tooltip: {
+                formatter: function () {
+                    str = "";
+                    for (let i = 0; i < this.point.series.userOptions.categories.length; i++) {
+                        if (this.point.series.userOptions.categories[i].balls[this.point.index] != 0) {
+                            str += this.point.series.userOptions.categories[i].name + ": " + this.point.series.userOptions.categories[i].balls[this.point.index] + "<br>";
+                        }
+
+                    }
+
+                    return str;
+                }
+            },
+            title: {
+                text: '{% trans 'Статистика' %}'
+            },
+            xAxis: {
+
+                id: "years",
+                categories: ['2019', '2020', '2021', '2022', '2023'],
+                title: {
+                    text: '{% trans 'Год' %}'
+                }
+            },
+            yAxis: {
+                id: 'division_y_axis',
+
+                title: {
+                    text: '{% trans 'Количество баллов' %}'
+                },
+                stackLabels: {
+                    enabled: true,
+                    style: {
+                        fontWeight: 'bold',
+                        color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                    }
+                }
+            },
+            legend: {
+                reversed: true
+            },
+            plotOptions: {
+                series: {
+                    stacking: 'normal'
+                }
+            },
+            series: []
+        });
+        $.ajax({
+            headers: {"X-CSRFToken": "{{csrf_token}}"},
+            url: "{% url 'api_division:report' division.id %}",
+            method: 'GET',
+
+            success: function (data) {
+                let years = [];
+
+                for (let i = 0; i < data.year.length; i++) {
+                    years.push(`${data.year[i]}`);
+                }
+
+                for (let i = 0; i < data.group.length; i++) {
+                    let column_color = '#f7a35c'
+                    if (data.group[i].id == 3)
+                        continue
+                    if (data.group[i].id == 1) {
+                        column_color = '#90ed7d'
+                    }
+                    if (data.group[i].id == 2) {
+                        column_color = '#7cb5ec'
+                    }
+                    division_chart.addSeries({
+                        'color': column_color,
+                        "name": data.group[i].name,
+                        "data": data.group[i].total_balls,
+                        "categories": data.group[i].category
+                    })
+                }
+                division_chart.get("years").update({categories: years});
+
+                division_chart.get("division_y_axis").update({plotLines: division_plot_lines});
+            }
+
+        });
+
+
+        $("#selectDvision").change(function () {
+            window.location.href = `/user/division/${$(this).val()}`;
+        })
+    </script>
+{% endblock %}

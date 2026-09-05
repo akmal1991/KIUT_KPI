@@ -1,0 +1,262 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="main-title d-flex align-items-center justify-content-between">
+            <h1 class="">Годовой коэффициент категории</h1>
+            <a href="#openAddLevel" class="openAddLevelBtn btn btn-primary">Добавить</a>
+        </div>
+
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'index_admin:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'category_admin:list' %}">Категория</a></li>
+            <li class="breadcrumb-item active">Коэффициент категории</li>
+        </ol>
+
+
+        <div class="main-table">
+            <table class="interior-table ">
+                <thead>
+                <tr>
+                    <th width="1%">№</th>
+                    <th width="100px">Категория</th>
+                    <th width="100px">Учебный год</th>
+                    <th width="100px">коэффициент</th>
+                    <th width="1%"></th>
+                    <th width="1%"></th>
+                </tr>
+                </thead>
+                <tbody class="tbody">
+                {% for coefficient in category_coefficients %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ coefficient.category.name_ru }}</td>
+                        <td>{{ coefficient.academic_year.years }}</td>
+                        <td>{{ coefficient.coef }}</td>
+                        <td>
+                            <a href="#openEditLevel"
+                               data-url="{% url 'api_category:get_update_delete_coefficient' coefficient.id %}"
+                               class="badge bg-primary openEditLevelBtn"><i class="fas fa-edit"></i></a>
+                        </td>
+                        <td>
+                            <a href="#openDeleteLevel"
+                               data-url="{% url 'api_category:get_update_delete_coefficient' coefficient.id %}"
+                               class="badge bg-danger openDeleteLevelBtn"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <br>
+        </div>
+
+    </div>
+{% endblock %}
+
+
+{% block modals %}
+    <!-- Modals -->
+    <div id="openAddLevel" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Добавить</h2>
+            </div>
+            <div class="popup-content">
+                <form id="createCoefForm">
+                    <div class="form-group">
+                        <label for="coef">Коэффициент: *</label>
+                        <input type="number" class="form-control" name="coef" id="coef" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="academic_year">Академик год: *</label>
+                        <select id="academic_year" class="form-control" name="academic_year">
+                            {% for academic_year in academic_years %}
+                                <option value="{{ academic_year.id }}">{{ academic_year.years }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="popup-footer">
+                        <a href="#" class="btn btn-close">Отменить</a>
+                        <button type="submit" id="saveAddLevel" href="#" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="openEditLevel" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Редактировать</h2>
+            </div>
+            <div class="popup-content">
+                <form action="">
+                    <div class="tab-pane fade show active" id="editPills1" role="tabpanel">
+                        <div class="form-group">
+                            <label for="coefE">Коэффициент:</label>
+                            <input type="text" class="form-control" name="coefE" id="coefE">
+                        </div>
+                        <div class="form-group">
+                            <label for="academic_yearE">Академик год: *</label>
+                            <select id="academic_yearE" class="form-control" name="academic_yearE">
+                                {% for academic_year in academic_years %}
+                                    <option value="{{ academic_year.id }}">{{ academic_year.years }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="saveEditLevel" href="#" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="openDeleteLevel" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Удалить</h2>
+            </div>
+            <div class="popup-content">
+                <p>Вы действительно хотите удалить Коэффициент ?</p>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="deleteLevelBtn" href="#" class="btn btn-delete">Удалить</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        {#Create Level#}
+        $('.openAddLevelBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+        $("#createCoefForm").submit(function (e) {
+            e.preventDefault();
+            let formData = new FormData();
+
+            formData.append("category", {{ object.id }});
+            formData.append("academic_year", $("#academic_year").val());
+            formData.append("coef", $("#coef").val());
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
+                url: "{% url 'api_category:create_coefficient' %}",
+                processData: false,
+                contentType: false,
+                method: 'POST',
+                data: formData,
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Произошла ошибка: ' + errorThrown);
+                }
+            });
+        });
+
+        {#Update Level#}
+        let edit_url = "";
+        $('.openEditLevelBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+        $('.openEditLevelBtn').click(function () {
+            edit_url = $(this).data('url');
+            $.getJSON(`${edit_url}`, function (data) {
+                $("#coefE").val(data.coef);
+                $("#academic_yearE").val(data.academic_year).trigger('change');
+
+
+                setTimeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                }, 500);
+            });
+        });
+        $("#saveEditLevel").click(function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+            formData.append("category", {{ object.id }});
+            formData.append("academic_year", $("#academic_yearE").val());
+            formData.append("coef", $("#coefE").val());
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
+                url: edit_url,
+                processData: false,
+                contentType: false,
+                method: 'PUT',
+                data: formData,
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        /* Delete Category */
+        let delete_url = "";
+        $('.openDeleteLevelBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+
+        $('.openDeleteLevelBtn').click(function () {
+            delete_url = $(this).data('url');
+        });
+
+        $("#deleteLevelBtn").click(function (event) {
+            event.preventDefault();
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
+                url: delete_url,
+                method: 'DELETE',
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        $('.btn-close').click(function (event) {
+            event.preventDefault();
+
+            $.magnificPopup.close();
+        });
+    </script>
+
+{% endblock %}

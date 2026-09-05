@@ -1,0 +1,440 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="main-title d-flex align-items-center justify-content-between">
+            <h1 class="">Добавить позицию</h1>
+        </div>
+
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'index_admin:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'post_admin:admin_list' %}">статистика</a></li>
+            <li class="breadcrumb-item active">{{ post.title_ru }}</li>
+        </ol>
+
+
+        <div class="main-content">
+            <form id="updatePostForm">
+                <div class="row">
+                    <div class="col-3">
+
+                    </div>
+                    <div class="col-9">
+                        <ul class="nav nav-pills mb-3" id="addTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="addTab1" data-toggle="pill" href="#addPills1" role="tab"
+                                   aria-selected="true">Uz</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="addTab2" data-toggle="pill" href="#addPills2" role="tab"
+                                   aria-selected="false">Ru</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="addTab3" data-toggle="pill" href="#addPills3" role="tab"
+                                   aria-selected="false">En</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-content" id="addPills">
+                    <div class="tab-pane fade show active" id="addPills1" role="tabpanel">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="title_uz" style="text-align: right;margin: 5px 0;width: 100%;">Заголовок
+                                        (uz): </label>
+                                </div>
+                                <div class="col-9">
+                                    <input id="title_uz" type="text" class="form-control" name="title_uz"
+                                           value="{{ post.title_uz }}">
+                                    <div id="message_uz" class="text-danger"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="body_uz" style="text-align: right;margin: 5px 0;width: 100%;">Краткое
+                                        содержание (uz): </label>
+                                </div>
+                                <div class="col-9">
+                                    <textarea id="body_uz" class="moxiecut form-control" name="body_uz"
+                                              rows="4">{{ post.body_uz }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="addPills2" role="tabpanel">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="title_ru" style="text-align: right;margin: 5px 0;width: 100%;">Заголовок
+                                        (ru): </label>
+                                </div>
+                                <div class="col-9">
+                                    <input id="title_ru" type="text" class="form-control" name="title_ru"
+                                           value="{{ post.title_ru }}">
+                                    <div id="message_ru" class="text-danger"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="body_ru" style="text-align: right;margin: 5px 0;width: 100%;">Краткое
+                                        содержание (ru): </label>
+                                </div>
+                                <div class="col-9">
+                                    <textarea id="body_ru" class="moxiecut form-control" name="body_ru"
+                                              rows="4">{{ post.body_ru }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="addPills3" role="tabpanel">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="title_en" style="text-align: right;margin: 5px 0;width: 100%;">Заголовок
+                                        (en): </label>
+                                </div>
+                                <div class="col-9">
+                                    <input id="title_en" type="text" class="form-control" name="title_en"
+                                           value="{{ post.title_en }}">
+                                    <div id="message_en" class="text-danger"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="body_en" style="text-align: right;margin: 5px 0;width: 100%;">Краткое
+                                        содержание (en): </label>
+                                </div>
+                                <div class="col-9">
+                                    <textarea id="body_en" class="moxiecut form-control" name="body_en"
+                                              rows="4">{{ post.body_en }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="source"
+                                   style="text-align: right;margin: 5px 0;width: 100%;">Ссылка</label>
+                        </div>
+                        <div class="col-9">
+                            <input id="source" type="text" class="form-control" name="source"
+                                   value="{{ post.source|default_if_none:"" }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="teacher"
+                                   style="text-align: right;margin: 5px 0;width: 100%;">Преподаватель: </label>
+                        </div>
+                        <div class="col-9">
+                            <select class="form-control" name="teacher" id="teacher" data-live-search="true" required
+                                    title="Выберите">
+                                {% for teacher in teacher_list %}
+                                    {% if post.teacher.id == teacher.id %}
+                                        <option value="{{ teacher.id }}" selected>{{ teacher.get_full_name }}</option>
+                                    {% else %}
+                                        <option value="{{ teacher.id }}">{{ teacher.get_full_name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="type-category"
+                                   style="text-align: right;margin: 5px 0;width: 100%;">Тип: </label>
+                        </div>
+                        <div class="col-3">
+                            <select class="form-control" name="type-category" id="type-category" data-live-search="true"
+                                    title="Выберите"
+                                    onchange="updateURLParams()">
+                                {% for group in group_list %}
+                                    <option value="{{ group.id }}"
+                                            {% if post.category.group == group %}selected{% endif %}>{{ group.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-1">
+                            <label for="category"
+                                   style="text-align: right;margin: 5px 0;width: 100%;">Категория: </label>
+                        </div>
+                        <div class="col-5">
+                            <select class="form-control" name="category" id="category" data-live-search="true" required
+                                    title="Выберите">
+                                {% for category in category_list %}
+                                    {% if post.category.id == category.id %}
+                                        <option value="{{ category.id }}" selected>{{ category.name_ru }}</option>
+                                    {% else %}
+                                        <option value="{{ category.id }}">{{ category.name_ru }}</option>
+                                    {% endif %}
+
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="indexing"
+                                   style="text-align: right;margin: 5px 0;width: 100%;">Индексация</label>
+                        </div>
+                        <div class="col-9">
+                            <input id="indexing" type="text" class="form-control" name="indexing"
+                                   value="{{ post.indexing|default_if_none:"" }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="indexing"
+                                   style="text-align: right;margin: 5px 0;width: 100%;">Цель</label>
+                        </div>
+                        <div class="col-9">
+                            <select class="form-control" name="target" id="target" title="Выберите"
+                                    data-live-search="true">
+                                <option value="">---</option>
+                                {% for target in target_list %}
+                                    {% if post.target.id == target.id %}
+                                        <option value="{{ target.id }}" selected>{{ target.name_ru }}</option>
+                                    {% else %}
+                                        <option value="{{ target.id }}">{{ target.name_ru }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="status" style="text-align: right;margin: 5px 0;width: 100%;">Статус: </label>
+                        </div>
+                        <div class="col-9">
+                            <select class="form-control" name="status" id="status" required title="Выберите">
+                                <option value="1"{% if post.status == 1 %} selected {% endif %}>На рассмотреннии
+                                </option>
+                                <option value="2"{% if post.status == 2 %} selected {% endif %}>Одобрено</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="date" style="text-align: right;margin: 5px 0;width: 100%;">Дата: </label>
+                        </div>
+                        <div class="col-3">
+                            <input class="form-control" type="date" name="date" id="date"
+                                   value="{{ post.date|date:"Y-m-d" }}">
+                        </div>
+                        <div class="col-1">
+                            <label for="academic_year" style="text-align: right;margin: 5px 0;width: 100%;">Учеб.
+                                год: </label>
+                        </div>
+                        <div class="col-5">
+                            <select class="form-control" name="academic_year" id="academic_year"
+                                    title="Выберите">
+                                {% for academic_year in academic_years %}
+                                    <option value="{{ academic_year.id }}"
+                                            {% if academic_year == post.academic_years %}selected{% endif %}>
+                                        {{ academic_year.years }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-3">
+
+                        </div>
+                        <div class="col-9">
+                            <button type="submit" id="saveWorkBtn" class="btn btn-primary">Сохранить</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+{% endblock %}
+
+
+{% block modals %}
+
+{% endblock %}
+
+
+{% block js %}
+    <script src="{% static 'tinymce/js/tinymce/tinymce.min.js' %}"></script>
+
+    <script>
+        function checkTitleUniqueness(lang, title) {
+            const url = `/api/v1/post/unique/post-title/?title_${lang}=${title}`;
+            const submitBtn = document.getElementById("saveWorkBtn");
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const inputField = document.getElementById(`title_${lang}`);
+                    const messageContainer = document.getElementById(`message_${lang}`);
+                    if (Object.keys(data).length !== 0 && data.id !== {{ object.id }}) {
+                        inputField.classList.add('is-invalid');
+                        messageContainer.innerHTML = `Такой пост уже существует. <a target="_blank" href="/administrator/post/update/${data.id}">Ссылка на пост</a>`;
+                        {#submitBtn.disabled = true;#}
+                    } else {
+                        inputField.classList.remove('is-invalid');
+                        messageContainer.innerHTML = '';
+
+                        if (document.querySelectorAll('.is-invalid').length === 0) {
+                            submitBtn.disabled = false;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    submitBtn.disabled = false;
+                });
+        }
+
+        // Определение функции debounce
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Обертка для checkTitleUniqueness с debounce
+        const checkTitleDebounced = debounce(checkTitleUniqueness, 500);
+
+        // Изменение обработчиков событий для использования debounce
+        document.getElementById('title_uz').addEventListener('input', function () {
+            checkTitleDebounced('uz', this.value);
+        });
+
+        document.getElementById('title_ru').addEventListener('input', function () {
+            checkTitleDebounced('ru', this.value);
+        });
+
+        document.getElementById('title_en').addEventListener('input', function () {
+            checkTitleDebounced('en', this.value);
+        });
+    </script>
+
+    <script>
+        function removeAllOptions() {
+            let selectElement = document.getElementById("category");
+            while (selectElement.options.length > 0) {
+                selectElement.remove(0);
+            }
+        }
+
+        function addOptions(category_type_id) {
+            let selectElement = document.getElementById("category");
+            {% for category in category_list %}
+                if (category_type_id === "{{ category.group.id }}") {
+                    let option{{ category.id }} = document.createElement("option");
+                    option{{ category.id }}.value = "{{ category.id }}";
+                    option{{ category.id }}.text = "{{ category.name_ru }}";
+                    selectElement.add(option{{ category.id }});
+                }
+            {% endfor %}
+        }
+
+        function updateURLParams() {
+            let selectElement = document.getElementById("type-category");
+            let selectedValue = selectElement.options[selectElement.selectedIndex].value;
+            removeAllOptions();
+            addOptions(selectedValue);
+            $('#category').selectpicker('refresh');
+
+        }
+    </script>
+    <script>
+        tinymce.init({
+            selector: "textarea.moxiecut",
+            theme: "modern",
+            width: '100%',
+            height: 300,
+            plugins: [
+                'advlist autolink lists link image charmap preview hr anchor pagebreak',
+                'searchreplace wordcount visualblocks visualchars code',
+                'insertdatetime nonbreaking table contextmenu directionality',
+                'emoticons template paste textcolor colorpicker textpattern imagetools codesample'
+            ],
+            toolbar: 'insertfile undo redo | bold italic sizeselect fontsizeselect | hr alignleft aligncenter alignjustify | bullist numlist | emoticons | code',
+            fontsize_formats: "8pt 10pt 12pt 14pt 18pt 24pt 36pt",
+            branding: false,
+            menubar: false
+        });
+
+        $("#updatePostForm").submit(function (e) {
+            e.preventDefault();
+
+            let bodyUz = tinymce.get('body_uz').getContent();
+            let bodyRu = tinymce.get('body_ru').getContent();
+            let bodyEn = tinymce.get('body_en').getContent();
+            let formData = new FormData();
+
+            formData.append("title_uz", $("#title_uz").val());
+            formData.append("title_ru", $("#title_ru").val());
+            formData.append("title_en", $("#title_en").val());
+
+            formData.append("body_uz", bodyUz);
+            formData.append("body_ru", bodyRu);
+            formData.append("body_en", bodyEn);
+
+            formData.append("teacher", $("#teacher").val());
+            formData.append("category", $("#category").val());
+            formData.append("date", $("#date").val());
+
+            formData.append("indexing", $("#indexing").val());
+            formData.append("source", $("#source").val());
+            formData.append("status", $("#status").val());
+            formData.append("target", $("#target").val());
+
+            let url = "{% url 'api_post:get_update_delete' post.id %}";
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: url,
+                processData: false,
+                contentType: false,
+                method: 'PUT',
+                data: formData,
+                success: function (data) {
+                    //alert('успех!');
+                    window.location.href = "{% url 'post_admin:admin_list' %}";
+                },
+                error: function (data) {
+                    alert(data.responseText);
+                }
+            });
+        });
+    </script>
+{% endblock %}

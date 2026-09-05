@@ -1,0 +1,267 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="main-title d-flex align-items-center justify-content-between">
+            <h1 class="">Статистика</h1>
+            <a href="{% url 'post_admin:admin_create' %}" class="btn btn-primary">Добавить</a>
+        </div>
+
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'index_admin:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Статистика</li>
+        </ol>
+        <div class="form-group-search">
+            <div class="row align-items-center">
+                <div class="col-2">
+                    <form action="" method="get">
+                        <select name="select-data" id="select-data" class="form-control select-data"
+                                onchange="this.form.submit();">
+                            <option value="">Select by date...</option>
+                            <option value="date-created-desc">Дата создании по убыванию</option>
+                            <option value="date-created-asc">Дата создании по возрастанию</option>
+                            <option value="date-publications-desc">Дата публикации по убыванию</option>
+                            <option value="date-publications-asc">Дата публикации по возрастанию</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="col-2">
+                    <select id="groupInput" class="form-control">
+                        <option value="">Select by type...</option>
+                        {% for group in group_list %}
+                            {% if request.GET.group %}
+                                <option value="{{ group.id }}"
+                                        {% if group.id == request.GET.group|add:"0" %}
+                                        selected {% endif %}>{{ group.name }}</option>
+                            {% else %}
+                                <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-3">
+                    <select id="categoryInput" class="form-control" data-live-search="true">
+                        <option value="">Select by category...</option>
+                        {% for category in category_list %}
+                            {% if request.GET.category %}
+                                <option value="{{ category.id }}"
+                                        {% if category.id == request.GET.category|add:"0" %}
+                                        selected {% endif %}>{{ category.name }}</option>
+                            {% else %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-3">
+                    <select id="teacherInput" class="form-control" data-live-search="true">
+                        <option value="">Select by teacher...</option>
+                        <{% for teacher in teacher_list %}
+                        {% if request.GET.teacher %}
+                            <option value="{{ teacher.id }}"
+                                    {% if teacher.id == request.GET.teacher|add:"0" %}
+                                    selected {% endif %}>{{ teacher.get_full_name }}</option>
+                        {% else %}
+                            <option value="{{ teacher.id }}">{{ teacher.get_full_name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="col-2">
+                    <select id="yearInput" class="form-control">
+                        <option value="">Select by academic years...</option>
+                        {% for academic_year in academic_years %}
+                            {% if request.GET.academic_year %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year.id == request.GET.academic_year|add:"0" %}
+                                        selected {% endif %}>{{ academic_year.years }}</option>
+                            {% else %}
+                                <option value="{{ academic_year.id }}">{{ academic_year.years }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <br>
+            <form id="searchPostId">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <input type="text" name="name" id="searchNameId" class="form-control"
+                               placeholder="Название" value="{{ request.GET.name }}">
+                    </div>
+                    <div class="col col-auto">
+                        <button class="btn btn-primary" type="submit">Фильтр</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="main-table">
+            <table class="interior-table ">
+                <thead>
+                <tr>
+                    <th width="1%">№</th>
+                    <th width="300px">Название</th>
+                    <th width="75px">Автор</th>
+                    <th width="75px">Цель</th>
+                    <th width="20px">Дата публикации</th>
+                    <th width="20px">Дата создания</th>
+                    <th width="1%"></th>
+                    <th width="1%"></th>
+                </tr>
+                </thead>
+                <tbody class="tbody">
+                {% for post in post_list %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                        <td>
+                            <div class="table-title">
+                                <a href="{% url 'post_admin:admin_update' post.id %}">{{ post.title_ru }}</a>
+                                <small>{{ post.category.name_ru }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{% url 'user_admin:teacher_detail' post.teacher.id %}">{{ post.teacher.get_full_name }}</a>
+                        </td>
+                        <td>
+                            {% if post.target %}
+                                {{ post.target.name }}
+                            {% else %}
+                                Не выбрано
+                            {% endif %}
+                        </td>
+                        <td>{{ post.date }}</td>
+                        <td>{{ post.created.date }}</td>
+                        <td>
+                            <a href="{% url 'post_admin:admin_update' post.id %}" class="badge bg-primary"><i
+                                    class="fas fa-edit"></i></a>
+                        </td>
+                        <td>
+                            <a href="#openDeleteWork" data-url="{% url 'api_post:get_update_delete' post.id %}"
+                               class="badge bg-danger openDeleteWorkBtn"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+        <br>
+        {% load paginator %}
+        {% get_public_pagination %}
+
+    </div>
+{% endblock %}
+
+
+{% block modals %}
+    <div id="openDeleteWork" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Удалить</h2>
+            </div>
+            <div class="popup-content">
+                <p>Вы действительно хотите удалить позицию ?</p>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="deleteWorkBtn" href="#" class="btn btn-delete">Удалить</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $("#yearInput").on('change', function (e) {
+            let academic_year = $("#yearInput").val();
+            updateUrlParameter('academic_year', academic_year);
+        });
+
+        $("#groupInput").on('change', function (e) {
+            let group = $("#groupInput").val();
+            updateUrlParameter('group', group);
+        });
+
+        $("#categoryInput").on('change', function (e) {
+            let category = $("#categoryInput").val();
+            updateUrlParameter('category', category);
+        });
+
+        $("#teacherInput").on('change', function (e) {
+            let teacher = $("#teacherInput").val();
+            updateUrlParameter('teacher', teacher);
+        });
+
+        $("#searchPostId").submit(function (event) {
+            event.preventDefault();
+            let title = $("#searchNameId").val();
+            updateUrlParameter('name', title);
+        });
+
+        function updateUrlParameter(key, value) {
+            let currentUrl = window.location.href;
+            let url = new URL(currentUrl);
+            if (url.searchParams.has('page')) {
+                url.searchParams.delete('page');
+            }
+            url.searchParams.set(key, value);
+            window.location.href = url.toString();
+        }
+
+        const url_string = window.location.href;
+        const url = new URL(url_string);
+        const select_data = url.searchParams.get("select-data");
+        if (select_data !== null) {
+            $('#select-data').val(select_data)
+        }
+
+        /* Delete */
+        var delete_url = "";
+        $('.openDeleteWorkBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+
+        $('.openDeleteWorkBtn').click(function () {
+            delete_url = $(this).data('url');
+        });
+
+        $("#deleteWorkBtn").click(function (event) {
+            event.preventDefault();
+
+            let url = delete_url;
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: url,
+                method: 'DELETE',
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        $('.btn-close').click(function (event) {
+            event.preventDefault();
+
+            $.magnificPopup.close();
+        });
+    </script>
+{% endblock %}
+
+
+

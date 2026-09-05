@@ -1,0 +1,314 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="main-title d-flex align-items-center justify-content-between">
+            <h1 class="">Ученые степени</h1>
+            <a href="#openAddLevel" class="openAddLevelBtn btn btn-primary">Добавить</a>
+        </div>
+
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'index_admin:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Ученые степени</li>
+        </ol>
+
+
+        <div class="main-table">
+            <table class="interior-table ">
+                <thead>
+                <tr>
+                    <th width="1%">№</th>
+                    <th width="100px">Название</th>
+                    <th width="100px">Количество преподавателей</th>
+                    <th width="1%"></th>
+                    <th width="1%"></th>
+                </tr>
+                </thead>
+                <tbody class="tbody">
+                {% for teacherlevel in teacherlevel_list %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                        <td>{{ teacherlevel.name_ru }}</td>
+                        <td>{{ teacherlevel.teacher_set.count }}</td>
+                        <td>
+                            <a href="#openEditLevel"
+                               data-url="{% url 'api_user:teacher_level_get_update_delete' teacherlevel.id %}"
+                               class="badge bg-primary openEditLevelBtn"><i class="fas fa-edit"></i></a>
+                        </td>
+                        <td>
+                            <a href="#openDeleteLevel"
+                               data-url="{% url 'api_user:teacher_level_get_update_delete' teacherlevel.id %}"
+                               class="badge bg-danger openDeleteLevelBtn"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td>4</td>
+                    <td>Профессор</td>
+                    <td>{{ professor_count }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                </tbody>
+            </table>
+            <br>
+            {% load paginator %}
+            {% get_public_pagination %}
+        </div>
+
+    </div>
+{% endblock %}
+
+
+{% block modals %}
+    <!-- Modals -->
+    <div id="openAddLevel" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Добавить</h2>
+            </div>
+            <div class="popup-content">
+                <form action="">
+                    <ul class="nav nav-pills mb-3" id="addTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="addTab1" data-toggle="pill" href="#addPills1" role="tab"
+                               aria-selected="true">Uz</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="addTab2" data-toggle="pill" href="#addPills2" role="tab"
+                               aria-selected="false">Ru</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="addTab3" data-toggle="pill" href="#addPills3" role="tab"
+                               aria-selected="false">En</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="addPills">
+                        <div class="tab-pane fade show active" id="addPills1" role="tabpanel">
+                            <div class="form-group">
+                                <label for="name_uz">Название(uz):</label>
+                                <input type="text" class="form-control" name="name_uz" id="name_uz">
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="addPills2" role="tabpanel">
+                            <div class="form-group">
+                                <label for="name_ru">Название(ru):</label>
+                                <input type="text" class="form-control" name="name_ru" id="name_ru" required>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="addPills3" role="tabpanel">
+                            <div class="form-group">
+                                <label for="name_en">Название(en):</label>
+                                <input type="text" class="form-control" name="name_en" id="name_en">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="saveAddLevel" href="#" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="openEditLevel" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Редактировать</h2>
+            </div>
+            <div class="popup-content">
+                <form action="">
+                    <ul class="nav nav-pills mb-3" id="editTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="editTab1" data-toggle="pill" href="#editPills1" role="tab"
+                               aria-selected="true">Uz</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="editTab2" data-toggle="pill" href="#editPills2" role="tab"
+                               aria-selected="false">Ru</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="editTab3" data-toggle="pill" href="#editPills3" role="tab"
+                               aria-selected="false">En</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="editPills">
+                        <div class="tab-pane fade show active" id="editPills1" role="tabpanel">
+                            <div class="form-group">
+                                <label for="name_uzE">Название(uz):</label>
+                                <input type="text" class="form-control" name="name_uzE" id="name_uzE">
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="editPills2" role="tabpanel">
+                            <div class="form-group">
+                                <label for="name_ruE">Название(ru):</label>
+                                <input type="text" class="form-control" name="name_ruE" id="name_ruE">
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="editPills3" role="tabpanel">
+                            <div class="form-group">
+                                <label for="name_enE">Название(en):</label>
+                                <input type="text" class="form-control" name="name_enE" id="name_enE">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="saveEditLevel" href="#" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="openDeleteLevel" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Удалить</h2>
+            </div>
+            <div class="popup-content">
+                <p>Вы действительно хотите удалить ученную степень ?</p>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="deleteLevelBtn" href="#" class="btn btn-delete">Удалить</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        {#Create Level#}
+        $('.openAddLevelBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+        $("#saveAddLevel").click(function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+
+            formData.append("name_uz", $("#name_uz").val());
+            formData.append("name_ru", $("#name_ru").val());
+            formData.append("name_en", $("#name_en").val());
+
+            let url = "{% url 'api_user:teacher_level_create' %}";
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
+                url: url,
+                processData: false,
+                contentType: false,
+                method: 'POST',
+                data: formData,
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        {#Update Level#}
+        let edit_url = "";
+        $('.openEditLevelBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+        $('.openEditLevelBtn').click(function () {
+            edit_url = $(this).data('url');
+            $.getJSON(`${edit_url}`, function (data) {
+                $("#name_uzE").val(data.name_uz);
+                $("#name_ruE").val(data.name_ru);
+                $("#name_enE").val(data.name_en);
+
+
+                setTimeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                }, 500);
+            });
+        });
+        $("#saveEditLevel").click(function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+            formData.append("name_uz", $("#name_uzE").val());
+            formData.append("name_ru", $("#name_ruE").val());
+            formData.append("name_en", $("#name_enE").val());
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
+                url: edit_url,
+                processData: false,
+                contentType: false,
+                method: 'PUT',
+                data: formData,
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        /* Delete Category */
+        let delete_url = "";
+        $('.openDeleteLevelBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+
+        $('.openDeleteLevelBtn').click(function () {
+            delete_url = $(this).data('url');
+        });
+
+        $("#deleteLevelBtn").click(function (event) {
+            event.preventDefault();
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
+                url: delete_url,
+                method: 'DELETE',
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        $('.btn-close').click(function (event) {
+            event.preventDefault();
+
+            $.magnificPopup.close();
+        });
+    </script>
+
+{% endblock %}

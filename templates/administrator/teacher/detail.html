@@ -1,0 +1,768 @@
+{% extends 'base_admin.html' %}
+{% load category_coef %}
+{% load static %}
+{% block content %}
+    <section class="profile">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="profile-side">
+                        <form action="">
+                            <div class="form-group">
+                                <label for="selectTeacher">Преподаватели</label>
+                                <select class="form-control selectpicker" name="teacher" id="selectTeacher"
+                                        data-live-search="true" title="Выберите">
+                                    {% for teach in teacher_list %}
+                                        {% if teach.id == teacher.id %}
+                                            <option value="{{ teach.id }}" selected>{{ teach.get_full_name }}</option>
+                                        {% else %}
+                                            <option value="{{ teach.id }}">{{ teach.get_full_name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                        <div class="profile-info">
+                            <div class="profile-info__image">
+                                {% if teacher.image %}
+                                    <img src="{{ teacher.image.url }}" alt="">
+                                {% else %}
+                                    <img src="{% static 'public/images/banner1.jpg' %}" alt="">
+                                {% endif %}
+
+                            </div>
+                            <div class="profile-info__main">
+                                <h3>{{ teacher.get_full_name }}</h3>
+                                <span>Должность: {{ teacher.position|default_if_none:'' }}</span> <br>
+                                <span>Общий рейтинг: {{ teacher.get_total_ball }}</span> <br>
+                                <span>Дата регистрации:<br> {{ teacher.created.date }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="profile-main">
+                        <div class="profile-title">
+                            <h2>
+                                {{ teacher.get_full_name }}
+                                <td>
+                                    <a href="#openEditTeacher"
+                                       data-url="{% url 'api_user:teacher_get_update_delete' teacher.id %}"
+                                       class="badge bg-primary openEditTeacherBtn"><i class="fas fa-edit"></i></a>
+                                </td>
+                                <td>
+                                    <a href="#openDeleteTeacher"
+                                       class="badge bg-danger openDeleteTeacherBtn"><i class="fas fa-trash"></i></a>
+                                </td>
+                            </h2>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <figure class="highcharts-figure">
+                                    <div id="detailChart"></div>
+                                </figure>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="statistics">
+                                    <div class="categories">
+                                        <h3>Категории </h3>
+                                        <select id="yearInput" class="form-control">
+                                            {% for academic_year in academic_years %}
+                                                {% if request.GET.academic_year %}
+                                                    <option value="{{ academic_year.id }}"
+                                                            {% if academic_year.id == request.GET.academic_year|add:"0" %}
+                                                            selected {% endif %}>{{ academic_year.years }}</option>
+                                                {% else %}
+                                                    <option value="
+                                                            
+                                                            
+                                                            
+                                                            {{ academic_year.id }}{% if academic_year == current_academic_year %}selected{% endif %}">{{ academic_year.years }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                        <ul>
+                                            {% for category_obj in category_list %}
+                                                <li>
+                                                    {{ category_obj.category.name }}
+                                                    <strong style="{% if category_obj.limit == False %}color: red;{% endif %}">
+                                                        ({{ category_obj.count }})
+                                                    </strong>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container-fluid">
+        <div class="form-group-search">
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <select id="limitId" class="form-control">
+                        <option value="">---</option>
+                        <option value="True" {% if request.GET.limit %}selected{% endif %}>Category Limit Expired
+                        </option>
+                    </select>
+                </div>
+                <div class="col-3">
+                    <select id="categoryInput" class="form-control" data-live-search="true">
+                        <option value="">Select by category...</option>
+                        {% for category_obj in categories %}
+                            {% if request.GET.category %}
+                                <option value="{{ category_obj.category.id }}"
+                                        {% if category_obj.category.id == request.GET.category|add:"0" %}
+                                        selected {% endif %}>{{ category_obj.category.name }} ({{ category_obj.count }})
+                                </option>
+                            {% else %}
+                                <option value="{{ category_obj.category.id }}">{{ category_obj.category.name }}
+                                    ({{ category_obj.count }})
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-3">
+
+                </div>
+                <div class="col-3">
+                    <select id="yearInput1" class="form-control">
+                        {% for academic_year in academic_years %}
+                            {% if request.GET.academic_year %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year.id == request.GET.academic_year|add:"0" %}
+                                        selected {% endif %}>{{ academic_year.years }}</option>
+                            {% else %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year == current_academic_year %}selected{% endif %}>{{ academic_year.years }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-table">
+            <table class="interior-table ">
+                <thead>
+                <tr>
+                    <th width="1%">№</th>
+                    <th width="300px">Название</th>
+                    <th width="20px">Дата публикации</th>
+                    <th width="20px">Дата создания</th>
+                    <th width="1%"></th>
+                    <th width="1%"></th>
+                </tr>
+                </thead>
+                <tbody class="tbody">
+                {% for post in post_list %}
+                    <tr>
+                        <td>{{ forloop.counter0 }}</td>
+                        <td>
+                            <div class="table-title">
+                                <a href="{% url 'post_admin:admin_update' post.id %}">{{ post.title_ru }}</a>
+                                <small>
+                                    {{ post.category.name_ru }}
+                                    {% if teacher|get_category_limit_by_year:post == False %}
+                                        <small style="color: red;">Превышен
+                                            лимит({{ post.category.limit }})</small>{% endif %}
+                                </small>
+                            </div>
+                        </td>
+                        <td>{{ post.date }}</td>
+                        <td>{{ post.created.date }}</td>
+                        <td>
+                            <a href="{% url 'post_admin:admin_update' post.id %}" class="badge bg-primary"><i
+                                    class="fas fa-edit"></i></a>
+                        </td>
+                        <td>
+                            <a href="#openDeleteWork" data-url="{% url 'api_post:get_update_delete' post.id %}"
+                               class="badge bg-danger openDeleteWorkBtn"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    {#  modals  #}
+    <div id="openEditTeacher" class="white-popup white-popup__middle mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Редактировать</h2>
+            </div>
+            <div class="popup-content">
+                <form action="">
+                    <ul class="nav nav-pills mb-3" id="editTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="editTab1" data-toggle="pill" href="#editPills1" role="tab"
+                               aria-selected="true">Uz</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="editTab2" data-toggle="pill" href="#editPills2" role="tab"
+                               aria-selected="false">Ru</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="editTab3" data-toggle="pill" href="#editPills3" role="tab"
+                               aria-selected="false">En</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="editPills">
+                        <div class="tab-pane fade show active" id="editPills1" role="tabpanel">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="firstname_uzE">Имя(uz):</label>
+                                        <input type="text" class="form-control" name="firstname_uzE" id="firstname_uzE"
+                                               value="{{ teacher.first_name_uz|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="lastname_uzE">Фамилия(uz):</label>
+                                        <input type="text" class="form-control" name="lastname_uzE" id="lastname_uzE"
+                                               value="{{ teacher.last_name_uz|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="middlename_uzE">Отчество(uz):</label>
+                                        <input type="text" class="form-control" name="middlename_uzE"
+                                               value="{{ teacher.father_name_uz|default_if_none:'' }}"
+                                               id="middlename_uzE">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="position_uzE">Должность(uz):</label>
+                                        <input type="text" class="form-control" name="position_uzE" id="position_uzE"
+                                               value="{{ teacher.position_uz|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="editPills2" role="tabpanel">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="firstname_ruE">Имя(ru):</label>
+                                        <input type="text" class="form-control" name="firstname_ruE" id="firstname_ruE"
+                                               value="{{ teacher.first_name_ru|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="lastname_ruE">Фамилия(ru):</label>
+                                        <input type="text" class="form-control" name="lastname_ruE" id="lastname_ruE"
+                                               value="{{ teacher.last_name_ru|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="middlename_ruE">Отчество(ru):</label>
+                                        <input type="text" class="form-control" name="middlename_ruE"
+                                               value="{{ teacher.father_name_ru|default_if_none:'' }}"
+                                               id="middlename_ruE">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="position_ruE">Должность(ru):</label>
+                                        <input type="text" class="form-control" name="position_ruE" id="position_ruE"
+                                               value="{{ teacher.position_ru|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="editPills3" role="tabpanel">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="firstname_enE">Имя(en):</label>
+                                        <input type="text" class="form-control" name="firstname_enE" id="firstname_enE"
+                                               value="{{ teacher.first_name_en|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="lastname_enE">Фамилия(en):</label>
+                                        <input type="text" class="form-control" name="lastname_enE" id="lastname_enE"
+                                               value="{{ teacher.last_name_en|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="middlename_enE">Отчество(en):</label>
+                                        <input type="text" class="form-control" name="middlename_enE"
+                                               id="middlename_enE"
+                                               value="{{ teacher.father_name_en|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="position_enE">Должность(en):</label>
+                                        <input type="text" class="form-control" name="position_enE" id="position_enE"
+                                               value="{{ teacher.position_en|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="levelE">Ученная степень:</label>
+                                <select class="selectpicker form-control" name="levelE" id="levelE" required
+                                        title="Выберите">
+                                    <option value="">отсутствует</option>
+                                    {% for teacterlevel in teacher_level_list %}
+                                        <option value="{{ teacterlevel.id }}"
+                                                {% if teacher.level == teacterlevel %}selected{% endif %}>{{ teacterlevel.name_ru }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="academic-levelE">Ученое звание:</label>
+                                <select class="selectpicker form-control" name="academic-levelE" id="academic-levelE"
+                                        required
+                                        title="Выберите">
+                                    <option value="">отсутствует</option>
+                                    {% for teacteracademiclevel in teacher_academic_level_list %}
+                                        <option value="{{ teacteracademiclevel.id }}"
+                                                {% if teacher.academic_title == teacteracademiclevel %}selected{% endif %}>
+                                            {{ teacteracademiclevel.name_ru }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="divisionE">Кафедра:</label>
+                                <select class="selectpicker form-control" name="divisionE" id="divisionE">
+                                    {% for division in division_list %}
+                                        <option value="{{ division.id }}"
+                                                {% if teacher.division == division %}selected{% endif %}>
+                                            {{ division.name_ru }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="uuidE">ID:</label>
+                                <input type="text" class="form-control" name="uuidE" id="uuidE"
+                                       value="{{ teacher.uuid|default_if_none:'' }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="statusE">Статус:</label>
+                                <select class="selectpicker form-control" name="statusE" id="statusE"
+                                        onchange="toggleExtDateField()">
+                                    <option value="1" {% if teacher.status == 1 %}selected{% endif %}>Постоянный
+                                    </option>
+                                    <option value="2" {% if teacher.status == 2 %}selected{% endif %}>Совместитель
+                                    </option>
+                                    <option value="3" {% if teacher.status == 3 %}selected{% endif %}>Выбыл</option>
+                                    <option value="4" {% if teacher.status == 4 %}selected{% endif %}>Почасовик</option>
+                                </select>
+                            </div>
+                            {% if teacher.status == 3 %}
+                                <div class="form-group" id="extDateGroup">
+                                    <label for="ext_date">Дата выбытия:</label>
+                                    <input type="date" class="form-control" name="ext_date" id="ext_date"
+                                           value="{{ teacher.ext_date|date:"Y-m-d" }}">
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-avatar">
+                                <div class="avatar-upload">
+                                    <div class="avatar-edit">
+                                        <input type="file" id="imageUploadE" accept=".png, .jpg, .jpeg">
+                                        <label for="imageUploadE"><i class="fas fa-pencil-alt"></i></label>
+                                    </div>
+                                    <div class="avatar-preview">
+                                        <div id="imagePreviewE"
+                                             style="background-image: url('
+                                                     {% if teacher.image %}{{ teacher.image.url }}{% endif %}');">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="saveEditTeacher" href="#" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="openDeleteTeacher" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Удалить</h2>
+            </div>
+            <div class="popup-content">
+                <p>Вы действительно хотите удалить эту преподователь?</p>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="deleteTeacherBtn" href="#" class="btn btn-delete">Удалить</a>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="openDeleteWork" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Удалить</h2>
+            </div>
+            <div class="popup-content">
+                <p>Вы действительно хотите удалить позицию ?</p>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="deleteWorkBtn" href="#" class="btn btn-delete">Удалить</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script>
+
+        $("#yearInput").on('change', function (e) {
+            let academic_year = $("#yearInput").val();
+            updateUrlParameter('academic_year', academic_year);
+        });
+
+        $("#yearInput1").on('change', function (e) {
+            let academic_year = $("#yearInput1").val();
+            updateUrlParameter('academic_year', academic_year);
+        });
+
+        $("#categoryInput").on('change', function (e) {
+            let category = $("#categoryInput").val();
+            updateUrlParameter('category', category);
+        });
+
+        $("#limitId").on('change', function (e) {
+            let limit = $("#limitId").val();
+            updateUrlParameter('limit', limit);
+        });
+
+
+        function updateUrlParameter(key, value) {
+            let currentUrl = window.location.href;
+            let url = new URL(currentUrl);
+            url.searchParams.set(key, value);
+            window.location.href = url.toString();
+        }
+
+        $(function () {
+            $('.selectpicker').selectpicker();
+        });
+
+        teacher_chart = Highcharts.chart('detailChart', {
+            chart: {
+                type: 'column'
+            },
+            tooltip: {
+                formatter: function () {
+                    str = "";
+                    for (let i = 0; i < this.point.series.userOptions.categories.length; i++) {
+                        if (this.point.series.userOptions.categories[i].balls[this.point.index] != 0) {
+                            str += this.point.series.userOptions.categories[i].name + ": " + this.point.series.userOptions.categories[i].balls[this.point.index] + "<br>";
+                        }
+                    }
+
+                    return str;
+                }
+            },
+            title: {
+                text: 'Статистика'
+            },
+            xAxis: {
+                id: "years",
+                categories: [],
+                title: {
+                    text: 'Год'
+                }
+            },
+            yAxis: {
+                id: 'teacher_y_axis',
+                title: {
+                    text: 'Количество баллов'
+                },
+                stackLabels: {
+                    enabled: true,
+                    style: {
+                        fontWeight: 'bold',
+                        color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                    }
+                }
+            },
+            legend: {
+                reversed: true
+            },
+            plotOptions: {
+                series: {
+                    stacking: 'normal'
+                }
+            },
+            series: []
+        });
+
+        $.ajax({
+            headers: {"X-CSRFToken": "{{csrf_token}}"},
+            url: "{% url 'api_user:teacher_report' teacher.id %}",
+            method: 'GET',
+
+            success: function (data) {
+                let years = [];
+
+                for (let i = 0; i < data.academic_years.length; i++) {
+                    years.push(`${data.academic_years[i]}`);
+                }
+                for (let i = 0; i < data.group.length; i++) {
+                    let column_color = '#7cb5ec'
+                    if (data.group[i].id == 1) {
+                        column_color = '#f7a35c'
+                    }
+                    if (data.group[i].id == 2) {
+                        column_color = '#90ed7d'
+                    }
+
+
+                    teacher_chart.addSeries({
+                        "color": column_color,
+                        "name": data.group[i].name,
+                        "data": data.group[i].total_balls,
+                        "categories": data.group[i].category
+                    })
+                }
+                teacher_chart.get("years").update({categories: years});
+
+                let teacher_plot_lines = [{
+                    color: '#4CAF50',
+                    width: 1,
+                    dashStyle: 'LongDashDot',
+                    zIndex: 3,
+                    value: data.high_line,
+                    label: {
+                        text: `${data.high_line}`, // Label for the red line with bal value
+                        align: 'left',
+                        style: {
+                            color: '#4CAF50'
+                        }
+                    }
+                }, {
+                    color: '#FF0000', // Red color
+                    width: 1,
+                    dashStyle: 'LongDashDot',
+                    zIndex: 3,
+                    value: data.low_line, // The value where the red line should appear
+                    label: {
+                        text: `${data.low_line}`, // Label for the red line with bal value
+                        align: 'left',
+                        style: {
+                            color: '#FF0000'
+                        }
+                    }
+                }]
+                {#console.log(data)#}
+                teacher_chart.get("teacher_y_axis").update({plotLines: teacher_plot_lines});
+            }
+
+        });
+
+        $("#selectYear").change(function () {
+            window.location.href = `{% url 'user_public:teacher_detail' teacher.id %}?year=${$(this).val()}`;
+        });
+        $("#selectTeacher").change(function () {
+            window.location.href = `/administrator/user/teacher/${$(this).val()}`;
+        });
+    </script>
+
+    <script>
+        /* Update */
+
+
+        $("#imageUpload").change(function () {
+            readURL(this);
+        });
+
+        function readURLE(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#imagePreviewE').css('background-image', 'url(' + e.target.result + ')');
+                    $('#imagePreviewE').hide();
+                    $('#imagePreviewE').fadeIn(650);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $("#imageUploadE").change(function () {
+            readURLE(this);
+        });
+
+
+        var edit_url = "";
+        $('.openEditTeacherBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+
+        $("#saveEditTeacher").click(function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+
+            formData.append("first_name_uz", $("#firstname_uzE").val());
+            formData.append("first_name_ru", $("#firstname_ruE").val());
+            formData.append("first_name_en", $("#firstname_enE").val());
+
+            formData.append("last_name_uz", $("#lastname_uzE").val());
+            formData.append("last_name_ru", $("#lastname_ruE").val());
+            formData.append("last_name_en", $("#lastname_enE").val());
+
+            formData.append("father_name_uz", $("#middlename_uzE").val());
+            formData.append("father_name_ru", $("#middlename_ruE").val());
+            formData.append("father_name_en", $("#middlename_enE").val());
+
+            formData.append("position_uz", $("#position_uzE").val());
+            formData.append("position_ru", $("#position_ruE").val());
+            formData.append("position_en", $("#position_enE").val());
+
+            formData.append("level", $("#levelE").val());
+            formData.append("academic_title", $("#academic-levelE").val());
+            formData.append("division", $("#divisionE").val());
+
+            formData.append("uuid", $("#uuidE").val());
+            formData.append("status", $("#statusE").val());
+
+            if ($("#ext_date").val()) {
+                formData.append("ext_date", $("#ext_date").val());
+            }
+
+            for (let i = 0; i < $("#imageUploadE")[0].files.length; i++) {
+                formData.append('image', $("#imageUploadE")[0].files[i]);
+            }
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: '{% url 'api_user:teacher_get_update_delete' teacher.id %}',
+                processData: false,
+                contentType: false,
+                method: 'PUT',
+                data: formData,
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        /* Delete */
+        var delete_url = "";
+        $('.openDeleteTeacherBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+
+        $('.openDeleteTeacherBtn').click(function () {
+            delete_url = $(this).data('url');
+        });
+
+        $("#deleteTeacherBtn").click(function (event) {
+            event.preventDefault();
+
+            let url = "{% url 'api_user:teacher_get_update_delete' teacher.id %}";
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: url,
+                method: 'DELETE',
+                success: function (data) {
+                    window.location.href = '{% url "user_admin:teacher_list" %}';
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+
+        var delete_url_post = "";
+        $('.openDeleteWorkBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+
+        $('.openDeleteWorkBtn').click(function () {
+            delete_url_post = $(this).data('url');
+        });
+
+        $("#deleteWorkBtn").click(function (event) {
+            event.preventDefault();
+
+            let url_post = delete_url_post;
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{csrf_token}}"},
+                url: url_post,
+                method: 'DELETE',
+                success: function (data) {
+                    //alert('успех!');
+                    location.reload();
+                },
+                error: function (data) {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+
+        $('.btn-close').click(function (event) {
+            event.preventDefault();
+
+            $.magnificPopup.close();
+        });
+    </script>
+{% endblock %}

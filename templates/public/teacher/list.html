@@ -1,0 +1,129 @@
+{% extends 'base_public.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+    <section class="home">
+        <div class="container">
+            <form class="form-search" action="" method="get">
+                <div>
+                    <div class="form-group col-2 offset-10 d-flex ">
+                        <a href="#" class="btn btn-secondary receiptExcel mx-0 mr-2" id="excelButton">
+                            Excel
+                        </a>
+                        <select name="academic_year" id="yearInput" class="form-control selectpicker">
+                            {% for academic_year in academic_year_list %}
+                                {% if request.GET.academic_year %}
+                                    <option value="{{ academic_year.id }}"
+                                            {% if academic_year.id == request.GET.academic_year|add:"0" %}
+                                            selected {% endif %}>{{ academic_year.years }}</option>
+                                {% else %}
+                                    <option value="{{ academic_year.id }}"
+                                            {% if academic_year.id == current_academic_year %}
+                                            selected {% endif %}>{{ academic_year.years }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="block-grey">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <select name="division" class="form-control selectpicker" data-live-search="true"
+                                    title="{% trans 'Кафедра' %}">
+                                <option value="">{% trans 'Все' %}</option>
+                                {% for division in division_list %}
+                                    <option value="{{ division.id }}">{{ division.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <input type="text" name="name" class="form-control" placeholder="{% trans 'Ф.И.О' %}">
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <input type="text" name="uuid" class="form-control" placeholder="ID">
+                        </div>
+                        <div class="col">
+                            <select name="level" class="form-control selectpicker" data-live-search="true"
+                                    title="{% trans 'Ученые степени' %}">
+                                {% for level in teacher_level_list %}
+                                    <option value="{{ level.id }}">{{ level.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-auto">
+                            <button class="btn btn-primary" type="submit">{% trans 'Фильтр' %}</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="block-grey">
+                <h2 class="block-grey__title">{% trans 'Преподаватели' %}</h2>
+                <div class="works-table p-0">
+                    <table class="table">
+                        <thead class="thead-light">
+                        <tr>
+                            <th width="1%">#</th>
+                            <th width="1%">ID</th>
+                            <th width="300px">{% trans 'Ф.И.О' %}</th>
+                            <th width="200px">{% trans 'Кафедра' %}</th>
+                            <th width="1%">{% trans 'Статус' %}</th>
+                            <th width="158px%">{% trans 'Дата регистрации' %}</th>
+                            <th width="1%" class="text-center">{% trans 'Баллы' %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for teacher in teacher_list %}
+                            <tr>
+                                <th>{{ forloop.counter0|add:page_obj.start_index }}</th>
+                                {% if teacher.uuid %}
+                                    <th>{{ teacher.uuid }}</th>
+                                {% else %}
+                                    <th> -</th>
+                                {% endif %}
+
+                                <td>
+                                    <a href="{% url 'user_public:teacher_detail' teacher.id %}">{{ teacher.get_full_name }}</a>
+                                </td>
+                                <td>{{ teacher.division.name }}</td>
+                                <td>{{ teacher.get_status_display }}</td>
+                                <td>{{ teacher.created.date }}</td>
+                                <td class="text-center">{{ teacher.total_ball }}</td>
+
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+                {% load paginator %}
+                {% get_public_pagination %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(function () {
+            $('.selectpicker').selectpicker();
+        });
+
+        $("#yearInput").on('change', function (e) {
+            year = $("#yearInput").val();
+            window.location.href = `?academic_year=${year}`;
+
+
+        });
+    </script>
+    <script>
+        document.getElementById("excelButton").addEventListener("click", function () {
+            let currentUrl = window.location.href;
+            let link = document.getElementById("excelButton");
+            let params = new URL(currentUrl).searchParams;
+            link.href = "{% url 'api_post:teacher_download_xlsx' %}?" + params;
+        });
+    </script>
+{% endblock %}

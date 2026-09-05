@@ -1,0 +1,90 @@
+{% extends 'base_public.html' %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+    <section class="home">
+
+        <div class="container">
+            <div class="row">
+                <div class="form-group col-2 offset-10  ">
+                    <select id="yearInput" class="form-control selectpicker">
+                        {% for academic_year in academic_year_list %}
+                            {% if request.GET.academic_year %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year.id == request.GET.academic_year|add:"0" %}
+                                        selected {% endif %}>{{ academic_year.years }}</option>
+                            {% else %}
+                                <option value="{{ academic_year.id }}"
+                                        {% if academic_year.id == current_academic_year %}
+                                        selected {% endif %}>{{ academic_year.years }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="block-grey">
+                <form action="" method="get">
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" name="name" class="form-control"
+                                   placeholder="{% trans 'Название кафедры' %}">
+                        </div>
+                        <div class="col col-auto">
+                            <button class="btn btn-primary" type="submit">{% trans 'Фильтр' %}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="block-grey">
+                <h2 class="block-grey__title">{% trans 'Кафедры' %}</h2>
+                <div class="works-table p-0">
+                    <table class="table">
+                        <thead class="thead-light">
+                        <tr>
+                            <th width="1%">#</th>
+                            <th width="300px">{% trans 'Название' %}</th>
+                            <th width="1%" class="text-center">{% trans 'Преподаватели' %}</th>
+                            <th width="1%" class="text-center">{% trans 'Академическая' %}</th>
+                            <th width="1%" class="text-center">{% trans 'Организационная' %}</th>
+                            <th width="1%" class="text-center">{% trans 'Научная деятельность' %}</th>
+                            <th width="1%" class="text-center">{% trans 'Общее' %}</th>
+
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for division in division_list %}
+                            <tr>
+                                <th>{{ forloop.counter0|add:page_obj.start_index }}</th>
+                                <td>
+                                    <a href="{% url 'user_public:division_detail' division.id %}">{{ division.name }}</a>
+                                </td>
+                                <td class="text-center">{{ division.get_total_teachers_count }}</td>
+                                <td class="text-center">{{ division.academ_ball|default_if_none:"0"|floatformat }} </td>
+                                <td class="text-center">{{ division.org_ball|default_if_none:"0"|floatformat }} </td>
+                                <td class="text-center">{{ division.scien_ball|default_if_none:"0"|floatformat }} </td>
+                                <td class="text-center">{{ division.total_coef|floatformat }} </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+                {% load paginator %}
+                {% get_public_pagination %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $("#yearInput").on('change', function (e) {
+            year = $("#yearInput").val();
+            window.location.href = `?academic_year=${year}`;
+
+
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,79 @@
+version: "3"
+
+services:
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+
+  # Database Postgres
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    restart: always
+
+  # Django Application
+  web:
+    build: .
+    command: sh run.sh
+    volumes:
+      - ./media:/code/media
+      - ./staticfiles:/code/staticfiles
+    ports:
+      - "8001:8000"
+
+    depends_on:
+      - db
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
+    restart: always
+
+  # Celery
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A ytit_django worker -l info
+    volumes:
+      - .:/code
+    environment:
+      - REDIS_HOST=redis
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
+    container_name: celery
+    depends_on:
+      - db
+      - redis
+      - web
+
+  #Celery beat
+  celery_beat:
+    restart: always
+    build:
+      context: .
+    command: celery -A ytit_django beat --scheduler django --loglevel=info
+    environment:
+      - REDIS_HOST=redis
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
+    container_name: celery_beat
+    depends_on:
+      - db
+      - redis
+      - web
