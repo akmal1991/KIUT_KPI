@@ -621,3 +621,86 @@ figure.highcharts-figure #container {
 .mobile-menu__screen {
     display: none;
 }
+
+/* Faculty self-registration */
+.header-register-btn {
+    background-color: transparent;
+    border: 1px solid #FFFFFF;
+    color: #FFFFFF;
+    border-radius: 18px;
+    padding: 6px 18px;
+    font-size: 15px;
+    margin-right: 20px;
+    white-space: nowrap;
+}
+
+.header-register-btn:hover {
+    background-color: #00A8CC;
+    border-color: #00A8CC;
+    color: #FFFFFF;
+}
+
+.faculty-modal .modal-header {
+    background: #002B49;
+    border-bottom: none;
+}
+
+.faculty-modal .modal-title {
+    color: #FFFFFF;
+}
+
+.faculty-modal .close {
+    color: #FFFFFF;
+    opacity: 0.8;
+    text-shadow: none;
+}
+
+.faculty-modal .close:hover {
+    color: #FFFFFF;
+    opacity: 1;
+}
+
+.faculty-dropzone {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.faculty-dropzone img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px dashed #E2E8F0;
+    padding: 2px;
+    margin-bottom: 8px;
+}
+
+.faculty-dropzone:hover img {
+    border-color: #00A8CC;
+}
+
+.faculty-dropzone span {
+    color: #00A8CC;
+    font-size: 14px;
+}
+
+.faculty-otp-input {
+    font-size: 28px;
+    letter-spacing: 12px;
+    text-align: center;
+    font-weight: 600;
+    color: #1E293B;
+}
+
+.faculty-otp-meta {
+    margin-top: 16px;
+}
+
+.faculty-otp-meta #facultyOtpTimer {
+    color: #64748B;
+    font-size: 14px;
+    margin-right: 12px;
+}

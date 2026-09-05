@@ -300,3 +300,19 @@ class DivisionPublicDetailView(generic.DetailView):
                                              'count': category.post_set.filter(
                                                  teacher__division=self.object).distinct().count()})
         return context
+
+
+class FacultyDashboardView(LoginRequiredMixin, generic.TemplateView):
+    """Landing page a self-registered faculty account is redirected to right
+    after OTP verification."""
+
+    template_name = 'public/faculty/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        teacher = self.request.user.teacher_profile
+        context['teacher'] = teacher
+        context['current_academic_year'] = AcademicYear.get_current_academic_year()
+        if teacher:
+            context['recent_posts'] = teacher.post_set.order_by('-date')[:10]
+        return context

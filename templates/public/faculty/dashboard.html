@@ -1,0 +1,76 @@
+{% extends 'base_public.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+    <section class="home">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="profile-side">
+                        <div class="profile-info">
+                            <div class="profile-info__image">
+                                {% if teacher.image %}
+                                    <img src="{{ teacher.image.url }}" alt="">
+                                {% else %}
+                                    <img src="{% static 'public/images/banner1.jpg' %}" alt="">
+                                {% endif %}
+                            </div>
+                            <div class="profile-info__main">
+                                <h3>{{ teacher.get_full_name|default:request.user.get_full_name }}</h3>
+                                <span>{% trans 'Должность' %}: {{ teacher.position|default_if_none:'' }}</span><br>
+                                <span>{% trans 'Кафедра' %}: {{ teacher.division|default_if_none:'' }}</span><br>
+                                <span>{% trans 'Общий рейтинг' %}: {{ teacher.get_total_ball|default:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="block-grey">
+                        <h2 class="block-grey__title">{% trans 'Личный кабинет' %}</h2>
+                        <p>{% trans 'Добро пожаловать' %}, {{ request.user.get_full_name }}!</p>
+                        <p>{% trans 'Email' %}: {{ request.user.email }}</p>
+                        <p>{% trans 'Академический год' %}: {{ current_academic_year.years|default_if_none:'-' }}</p>
+                    </div>
+
+                    <div class="block-grey">
+                        <h2 class="block-grey__title">{% trans 'Последняя активность' %}</h2>
+                        <div class="works-table p-0 overflow-auto">
+                            <table class="table">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th width="1%">#</th>
+                                    <th>{% trans 'Название' %}</th>
+                                    <th width="90px">{% trans 'Дата' %}</th>
+                                    <th class="text-center" width="1%">{% trans 'Статуc' %}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for post in recent_posts %}
+                                    <tr>
+                                        <th>{{ forloop.counter }}</th>
+                                        <td>
+                                            <div class="table-name">
+                                                <p>{{ post.title }}</p>
+                                                <span>{{ post.category.name }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{ post.date }}</td>
+                                        <td class="text-center">
+                                            {% if post.status == 1 %}{% trans 'В процессе' %}{% else %}{% trans 'Одобрено' %}{% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4">{% trans 'Пока нет записей' %}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
