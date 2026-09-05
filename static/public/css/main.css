@@ -704,3 +704,302 @@ figure.highcharts-figure #container {
     font-size: 14px;
     margin-right: 12px;
 }
+
+/* Faculty KPI dashboard */
+.coauthor-banner {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+}
+
+.coauthor-banner__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+    color: #1E293B;
+}
+
+.coauthor-banner__actions {
+    white-space: nowrap;
+    margin-left: 16px;
+}
+
+.kpi-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.progress-ring {
+    --pct: 0;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: conic-gradient(#00A8CC calc(var(--pct) * 1%), #E2E8F0 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-ring__inner {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.progress-ring__inner strong {
+    color: #1E293B;
+    font-size: 20px;
+    line-height: 1.1;
+}
+
+.progress-ring__inner span {
+    color: #64748B;
+    font-size: 11px;
+}
+
+.kpi-banner__stats {
+    display: flex;
+    gap: 32px;
+}
+
+.kpi-banner__rank-label {
+    display: block;
+    color: #64748B;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.kpi-banner__rank strong {
+    color: #002B49;
+    font-size: 20px;
+}
+
+.stat-cards-row {
+    margin: 0 0 10px;
+}
+
+.stat-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.stat-card__value {
+    display: block;
+    font-size: 26px;
+    font-weight: 600;
+    color: #1E293B;
+}
+
+.stat-card--positive .stat-card__value {
+    color: #16A34A;
+}
+
+.stat-card--negative .stat-card__value {
+    color: #DC2626;
+}
+
+.stat-card__label {
+    color: #64748B;
+    font-size: 13px;
+}
+
+.score-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.score-badge--positive {
+    background: #DCFCE7;
+    color: #16A34A;
+}
+
+.score-badge--negative {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.status-badge--pending {
+    background: #FEF3C7;
+    color: #B45309;
+}
+
+.status-badge--approved {
+    background: #DCFCE7;
+    color: #16A34A;
+}
+
+.status-badge--rejected {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.submission-row:hover {
+    background: #F8FAFC;
+}
+
+/* Slide-over drawer */
+.submission-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    visibility: hidden;
+}
+
+.submission-drawer--open {
+    visibility: visible;
+}
+
+.submission-drawer__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.submission-drawer--open .submission-drawer__backdrop {
+    opacity: 1;
+}
+
+.submission-drawer__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 420px;
+    max-width: 90vw;
+    background: #FFFFFF;
+    box-shadow: -4px 0 12px rgba(15, 23, 42, 0.15);
+    padding: 24px;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+}
+
+.submission-drawer--open .submission-drawer__panel {
+    transform: translateX(0);
+}
+
+.submission-drawer__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    color: #64748B;
+    cursor: pointer;
+}
+
+/* Add Result modal extras */
+.faculty-dropzone--wide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 80px;
+    border: 2px dashed #E2E8F0;
+    border-radius: 6px;
+    color: #64748B;
+    font-size: 14px;
+}
+
+.faculty-dropzone--wide:hover {
+    border-color: #00A8CC;
+}
+
+.file-list__item {
+    font-size: 13px;
+    color: #1E293B;
+    padding: 2px 0;
+}
+
+.file-list__item--error {
+    color: #DC2626;
+}
+
+.doi-result {
+    margin-top: 8px;
+    padding: 10px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #1E293B;
+}
+
+.coauthor-search-results {
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    margin-top: 4px;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.coauthor-search-results__item {
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.coauthor-search-results__item:hover {
+    background: #F8FAFC;
+}
+
+.coauthor-tags {
+    margin-top: 8px;
+}
+
+.coauthor-tag {
+    display: inline-block;
+    background: #E0F7FB;
+    color: #002B49;
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 13px;
+    margin: 0 6px 6px 0;
+    cursor: pointer;
+}
+
+.score-estimate-box {
+    background: #F0FDFA;
+    border: 1px solid #00A8CC;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 16px 0;
+    color: #002B49;
+    font-size: 14px;
+}
+
+.score-estimate-box strong {
+    color: #00A8CC;
+    font-size: 18px;
+}

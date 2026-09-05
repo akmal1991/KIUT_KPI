@@ -82,6 +82,11 @@ class CategoryType(models.Model):
 
 # Create your models here.
 class Category(models.Model):
+    class Distribution(models.TextChoices):
+        SOLO = 'SOLO', 'Single author'
+        FLAT_TEAM = 'FLAT_TEAM', 'Every team member gets full points'
+        WEIGHTED_SPLIT = 'WEIGHTED_SPLIT', 'Lead 100% / co-authors share %'
+
     name = models.CharField(max_length=255)
     is_delete = models.BooleanField(default=False)
     coef = models.FloatField()
@@ -90,6 +95,16 @@ class Category(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    # Co-authorship rules for the faculty self-submission flow.
+    distribution = models.CharField(max_length=32, choices=Distribution.choices, default=Distribution.SOLO)
+    # WEIGHTED_SPLIT: co-authors beyond the lead. FLAT_TEAM: total team members (lead included).
+    max_co_authors = models.PositiveSmallIntegerField(null=True, blank=True)
+    co_author_share_percent = models.FloatField(default=50.0)
+    requires_doi = models.BooleanField(default=False)
+    # False for system/admin-applied discipline penalties (Moodle audit, disrupted
+    # session, etc.) that a teacher cannot self-report through the submission modal.
+    self_submittable = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['name', 'group', 'coef']

@@ -5,9 +5,11 @@ from django.contrib.auth.models import Group
 from django.db.models import Q, Sum
 from django.views import generic
 
-from post.models import Post, AcademicYear
-from user.models import Teacher, Division, TeacherLevel, AcademicLevel
+from post.models import Post, AcademicYear, PostCoAuthor
+from user.models import Teacher, Division, TeacherLevel, AcademicLevel, ControlLimit
 from category.models import Category
+
+DEFAULT_KPI_TARGET = 200
 
 
 # Create your views here.
@@ -302,17 +304,77 @@ class DivisionPublicDetailView(generic.DetailView):
         return context
 
 
+def _rank_teacher(teacher, academic_year, queryset):
+    """1-based rank of `teacher` by total ball within `queryset`, matching the
+    same get_total_ball_by_year used by the public leaderboard."""
+    scores = sorted(
+        ((t.id, t.get_total_ball_by_year(academic_year.id)) for t in queryset),
+        key=lambda pair: pair[1],
+        reverse=True,
+    )
+    for index, (teacher_id, _) in enumerate(scores, start=1):
+        if teacher_id == teacher.id:
+            return index, len(scores)
+    return None, len(scores)
+
+
 class FacultyDashboardView(LoginRequiredMixin, generic.TemplateView):
     """Landing page a self-registered faculty account is redirected to right
-    after OTP verification."""
+    after OTP verification. Shows KPI progress, leaderboard standing, stat
+    cards, the submissions table (with filters), pending co-author requests,
+    and hosts the "Yangi natija kiritish" submission modal."""
 
     template_name = 'public/faculty/dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         teacher = self.request.user.teacher_profile
+        current_academic_year = AcademicYear.get_current_academic_year()
         context['teacher'] = teacher
-        context['current_academic_year'] = AcademicYear.get_current_academic_year()
-        if teacher:
-            context['recent_posts'] = teacher.post_set.order_by('-date')[:10]
+        context['current_academic_year'] = current_academic_year
+        context['division_list'] = Division.objects.all()
+        context['academic_year_list'] = AcademicYear.objects.all()
+        context['category_group_list'] = Group.objects.filter(category__isnull=False).distinct()
+
+        if not teacher or not current_academic_year:
+            return context
+
+        control_limit = ControlLimit.objects.last()
+        target_score = control_limit.high_limit if control_limit else DEFAULT_KPI_TARGET
+        current_total = teacher.get_total_ball_by_year(current_academic_year.id)
+
+        context['target_score'] = target_score
+        context['current_total'] = current_total
+        context['progress_percent'] = min(100, round((current_total / target_score) * 100)) if target_score else 0
+
+        if teacher.division:
+            division_queryset = Teacher.objects.exclude(status=3).filter(division=teacher.division)
+            context['division_rank'], context['division_total'] = _rank_teacher(
+                teacher, current_academic_year, division_queryset,
+            )
+        university_queryset = Teacher.objects.exclude(status=3)
+        context['university_rank'], context['university_total'] = _rank_teacher(
+            teacher, current_academic_year, university_queryset,
+        )
+
+        my_posts = Post.objects.filter(teacher=teacher)
+        context['stat_total_submissions'] = my_posts.count()
+        context['stat_approved_points'] = my_posts.filter(status=2).aggregate(
+            total=Sum('validated_score'))['total'] or 0
+        context['stat_pending_count'] = my_posts.filter(status=1).count()
+        context['stat_rejected_count'] = my_posts.filter(status=3).count()
+
+        submissions = my_posts.select_related('category', 'category__group').order_by('-date')
+        if self.request.GET.get('academic_year'):
+            submissions = submissions.filter(academic_years_id=self.request.GET['academic_year'])
+        if self.request.GET.get('group'):
+            submissions = submissions.filter(category__group_id=self.request.GET['group'])
+        if self.request.GET.get('status'):
+            submissions = submissions.filter(status=self.request.GET['status'])
+        context['submissions'] = submissions
+
+        context['pending_coauthor_requests'] = PostCoAuthor.objects.filter(
+            teacher=teacher, status=PostCoAuthor.Status.PENDING,
+        ).select_related('post', 'post__teacher')
+
         return context

@@ -3,74 +3,557 @@
 {% load static %}
 
 {% block content %}
-    <section class="home">
+    <section class="home faculty-dashboard">
         <div class="container">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="profile-side">
-                        <div class="profile-info">
-                            <div class="profile-info__image">
-                                {% if teacher.image %}
-                                    <img src="{{ teacher.image.url }}" alt="">
-                                {% else %}
-                                    <img src="{% static 'public/images/banner1.jpg' %}" alt="">
-                                {% endif %}
-                            </div>
-                            <div class="profile-info__main">
-                                <h3>{{ teacher.get_full_name|default:request.user.get_full_name }}</h3>
-                                <span>{% trans 'Должность' %}: {{ teacher.position|default_if_none:'' }}</span><br>
-                                <span>{% trans 'Кафедра' %}: {{ teacher.division|default_if_none:'' }}</span><br>
-                                <span>{% trans 'Общий рейтинг' %}: {{ teacher.get_total_ball|default:0 }}</span>
-                            </div>
+
+            {% if pending_coauthor_requests %}
+                <div class="coauthor-banner">
+                    {% for req in pending_coauthor_requests %}
+                        <div class="coauthor-banner__item" data-request-id="{{ req.id }}">
+                            <span>
+                                <strong>{{ req.post.teacher.get_full_name }}</strong>
+                                {% trans 'sizni hammuallif sifatida belgiladi' %}:
+                                "{{ req.post.title }}" ({{ req.share_percent }}%)
+                            </span>
+                            <span class="coauthor-banner__actions">
+                                <button type="button" class="btn btn-sm btn-secondary coauthor-confirm">{% trans 'Tasdiqlash' %}</button>
+                                <button type="button" class="btn btn-sm btn-link coauthor-reject">{% trans 'Rad etish' %}</button>
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="block-grey kpi-banner">
+                <div class="kpi-banner__ring">
+                    <div class="progress-ring" style="--pct: {{ progress_percent|default:0 }};">
+                        <div class="progress-ring__inner">
+                            <strong>{{ current_total|default:0 }}</strong>
+                            <span>/ {{ target_score|default:0 }} {% trans 'ball' %}</span>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-9">
-                    <div class="block-grey">
-                        <h2 class="block-grey__title">{% trans 'Личный кабинет' %}</h2>
-                        <p>{% trans 'Добро пожаловать' %}, {{ request.user.get_full_name }}!</p>
-                        <p>{% trans 'Email' %}: {{ request.user.email }}</p>
-                        <p>{% trans 'Академический год' %}: {{ current_academic_year.years|default_if_none:'-' }}</p>
+                <div class="kpi-banner__stats">
+                    <div class="kpi-banner__rank">
+                        <span class="kpi-banner__rank-label">{% trans 'Kafedra reytingi' %}</span>
+                        <strong>{% if division_rank %}{{ division_rank }} / {{ division_total }}{% else %}—{% endif %}</strong>
                     </div>
+                    <div class="kpi-banner__rank">
+                        <span class="kpi-banner__rank-label">{% trans 'Universitet reytingi' %}</span>
+                        <strong>{% if university_rank %}{{ university_rank }} / {{ university_total }}{% else %}—{% endif %}</strong>
+                    </div>
+                </div>
+                <div class="kpi-banner__cta">
+                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#addResultModal">
+                        + {% trans 'Yangi natija kiritish' %}
+                    </button>
+                </div>
+            </div>
 
-                    <div class="block-grey">
-                        <h2 class="block-grey__title">{% trans 'Последняя активность' %}</h2>
-                        <div class="works-table p-0 overflow-auto">
-                            <table class="table">
-                                <thead class="thead-light">
-                                <tr>
-                                    <th width="1%">#</th>
-                                    <th>{% trans 'Название' %}</th>
-                                    <th width="90px">{% trans 'Дата' %}</th>
-                                    <th class="text-center" width="1%">{% trans 'Статуc' %}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for post in recent_posts %}
-                                    <tr>
-                                        <th>{{ forloop.counter }}</th>
-                                        <td>
-                                            <div class="table-name">
-                                                <p>{{ post.title }}</p>
-                                                <span>{{ post.category.name }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="text-center">{{ post.date }}</td>
-                                        <td class="text-center">
-                                            {% if post.status == 1 %}{% trans 'В процессе' %}{% else %}{% trans 'Одобрено' %}{% endif %}
-                                        </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="4">{% trans 'Пока нет записей' %}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+            <div class="row stat-cards-row">
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <span class="stat-card__value">{{ stat_total_submissions|default:0 }}</span>
+                        <span class="stat-card__label">{% trans 'Jami arizalar' %}</span>
                     </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card stat-card--positive">
+                        <span class="stat-card__value">{{ stat_approved_points|default:0 }}</span>
+                        <span class="stat-card__label">{% trans 'Tasdiqlangan ball' %}</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <span class="stat-card__value">{{ stat_pending_count|default:0 }}</span>
+                        <span class="stat-card__label">{% trans 'Kutilmoqda' %}</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card stat-card--negative">
+                        <span class="stat-card__value">{{ stat_rejected_count|default:0 }}</span>
+                        <span class="stat-card__label">{% trans 'Rad etilgan' %}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="block-grey">
+                <h2 class="block-grey__title">{% trans 'Mening arizalarim' %}</h2>
+                <form method="get" class="form-row submissions-filters">
+                    <div class="form-group col-md-3">
+                        <select name="academic_year" class="form-control" onchange="this.form.submit()">
+                            <option value="">{% trans 'Barcha yillar' %}</option>
+                            {% for year in academic_year_list %}
+                                <option value="{{ year.id }}" {% if request.GET.academic_year == year.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ year.years }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <select name="group" class="form-control" onchange="this.form.submit()">
+                            <option value="">{% trans 'Barcha kategoriyalar' %}</option>
+                            {% for group in category_group_list %}
+                                <option value="{{ group.id }}" {% if request.GET.group == group.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ group.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <select name="status" class="form-control" onchange="this.form.submit()">
+                            <option value="">{% trans 'Barcha statuslar' %}</option>
+                            <option value="1" {% if request.GET.status == '1' %}selected{% endif %}>{% trans 'Kutilmoqda' %}</option>
+                            <option value="2" {% if request.GET.status == '2' %}selected{% endif %}>{% trans 'Tasdiqlangan' %}</option>
+                            <option value="3" {% if request.GET.status == '3' %}selected{% endif %}>{% trans 'Rad etilgan' %}</option>
+                        </select>
+                    </div>
+                </form>
+
+                <div class="works-table p-0 overflow-auto">
+                    <table class="table submissions-table">
+                        <thead class="thead-light">
+                        <tr>
+                            <th width="1%">#</th>
+                            <th>{% trans 'KPI mezoni' %}</th>
+                            <th>{% trans 'Sarlavha' %}</th>
+                            <th class="text-center">{% trans 'Taxminiy ball' %}</th>
+                            <th class="text-center">{% trans 'Tasdiqlangan ball' %}</th>
+                            <th class="text-center">{% trans 'Status' %}</th>
+                            <th class="text-center">{% trans 'Sana' %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for post in submissions %}
+                            <tr class="submission-row" data-submission-id="{{ post.id }}" style="cursor:pointer">
+                                <th>{{ forloop.counter }}</th>
+                                <td>{{ post.category.name }}</td>
+                                <td>{{ post.title }}</td>
+                                <td class="text-center">
+                                    {% if post.estimated_score >= 0 %}
+                                        <span class="score-badge score-badge--positive">+{{ post.estimated_score|default:'-' }}</span>
+                                    {% else %}
+                                        <span class="score-badge score-badge--negative">{{ post.estimated_score }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if post.validated_score != None %}
+                                        {% if post.validated_score >= 0 %}
+                                            <span class="score-badge score-badge--positive">+{{ post.validated_score }}</span>
+                                        {% else %}
+                                            <span class="score-badge score-badge--negative">{{ post.validated_score }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if post.status == 1 %}
+                                        <span class="status-badge status-badge--pending">{% trans 'Kutilmoqda' %}</span>
+                                    {% elif post.status == 2 %}
+                                        <span class="status-badge status-badge--approved">{% trans 'Tasdiqlangan' %}</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--rejected">{% trans 'Rad etilgan' %}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ post.date }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7">{% trans "Hozircha arizalar yo'q" %}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Slide-over drawer: submission detail (evidence + reviewer comment) -->
+    <div class="submission-drawer" id="submissionDrawer">
+        <div class="submission-drawer__backdrop"></div>
+        <div class="submission-drawer__panel">
+            <button type="button" class="submission-drawer__close">&times;</button>
+            <div class="submission-drawer__content" id="submissionDrawerContent">
+                <p class="text-center text-muted">{% trans 'Yuklanmoqda' %}...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- "Yangi natija kiritish" modal -->
+    <div class="modal fade" id="addResultModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content faculty-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">{% trans 'Yangi natija kiritish' %}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addResultForm" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>{% trans 'Asosiy kategoriya' %}</label>
+                                <select class="form-control" id="mainCategorySelect" required></select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>{% trans 'Aniq mezon' %}</label>
+                                <select class="form-control" id="criterionSelect" name="category" required></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="doiGroup" hidden>
+                            <label>DOI {% trans 'raqami' %}</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="doi" id="doiInput"
+                                       placeholder="10.1016/j.pas.2023.01.002">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-secondary" id="doiFetchBtn">{% trans 'Qidirish' %}</button>
+                                </div>
+                            </div>
+                            <div id="doiResult" class="doi-result" hidden></div>
+                            <div class="form-group mt-2" id="quartileGroup" hidden>
+                                <label>Quartile</label>
+                                <select class="form-control" name="quartile" id="quartileSelect">
+                                    <option value="Q1">Q1</option>
+                                    <option value="Q2">Q2</option>
+                                    <option value="Q3">Q3</option>
+                                    <option value="Q4">Q4</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-8">
+                                <label>{% trans 'Sarlavha' %}</label>
+                                <input type="text" class="form-control" name="title" required>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>{% trans 'Sana' %}</label>
+                                <input type="date" class="form-control" name="date" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="coAuthorGroup" hidden>
+                            <label>{% trans 'Hammualliflar' %}</label>
+                            <input type="text" class="form-control" id="coAuthorSearch"
+                                   placeholder="{% trans "Ism bo'yicha qidirish..." %}">
+                            <div id="coAuthorResults" class="coauthor-search-results" hidden></div>
+                            <div id="coAuthorTags" class="coauthor-tags"></div>
+                            <small class="form-text text-muted" id="coAuthorCapacityHint"></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>{% trans 'Tasdiqlovchi hujjat' %} (PDF/rasm, {% trans 'maksimal' %} 15MB)</label>
+                            <label for="proofFileInput" class="faculty-dropzone faculty-dropzone--wide">
+                                <span id="dropzoneLabel">{% trans "Fayl(lar)ni shu yerga torting yoki tanlang" %}</span>
+                            </label>
+                            <input type="file" id="proofFileInput" accept=".pdf,image/*" multiple hidden>
+                            <div id="fileList" class="file-list"></div>
+                        </div>
+
+                        <div class="score-estimate-box">
+                            {% trans "Taxminiy to'planadigan ball" %}: <strong id="estimatedScoreValue">0</strong> pts
+                        </div>
+
+                        <div id="addResultError" class="alert alert-danger small" hidden></div>
+                        <button type="submit" class="btn btn-secondary btn-block" id="addResultSubmit">
+                            {% trans 'Yuborish' %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        (function ($) {
+            'use strict';
+
+            var CSRF_TOKEN = "{{ csrf_token }}";
+            var categoriesByGroup = {};
+            var categoriesById = {};
+            var selectedCoAuthors = {};
+
+            function apiHeaders() {
+                return {"X-CSRFToken": CSRF_TOKEN};
+            }
+
+            // ---- Co-authorship confirm/reject banner ----
+            $('.coauthor-confirm, .coauthor-reject').on('click', function () {
+                var $item = $(this).closest('.coauthor-banner__item');
+                var requestId = $item.data('request-id');
+                var action = $(this).hasClass('coauthor-confirm') ? 'confirm' : 'reject';
+                $.ajax({
+                    url: '/api/v1/faculty/coauthor-requests/' + requestId + '/respond/',
+                    method: 'POST',
+                    headers: apiHeaders(),
+                    data: {action: action},
+                    success: function () {
+                        $item.fadeOut(200, function () { $(this).remove(); });
+                    }
+                });
+            });
+
+            // ---- Slide-over drawer ----
+            function openDrawer(submissionId) {
+                $('#submissionDrawer').addClass('submission-drawer--open');
+                $('#submissionDrawerContent').html('<p class="text-center text-muted">{% trans "Yuklanmoqda" %}...</p>');
+                $.ajax({
+                    url: '/api/v1/faculty/submissions/' + submissionId + '/',
+                    method: 'GET',
+                    success: function (data) {
+                        var docsHtml = data.documents.length
+                            ? data.documents.map(function (d) {
+                                return '<a href="' + d.file + '" target="_blank" class="d-block">' + d.file.split('/').pop() + '</a>';
+                            }).join('')
+                            : '<span class="text-muted">{% trans "Fayl biriktirilmagan" %}</span>';
+
+                        var coAuthorsHtml = data.co_authors.length
+                            ? data.co_authors.map(function (c) {
+                                return '<div>' + c.teacher_name + ' — ' + c.share_percent + '% (' + c.status + ')</div>';
+                            }).join('')
+                            : '<span class="text-muted">—</span>';
+
+                        var reviewHtml = data.review_comment
+                            ? '<p>' + data.review_comment + '</p>'
+                            : "<span class='text-muted'>{% trans "Izoh yo'q" %}</span>";
+
+                        $('#submissionDrawerContent').html(
+                            '<h4>' + data.title + '</h4>' +
+                            '<p class="text-muted">' + data.category_name + '</p>' +
+                            '<hr>' +
+                            '<h6>{% trans "Hujjatlar" %}</h6>' + docsHtml +
+                            '<hr>' +
+                            '<h6>{% trans "Hammualliflar" %}</h6>' + coAuthorsHtml +
+                            '<hr>' +
+                            '<h6>{% trans "Taqrizchi izohi" %}</h6>' + reviewHtml
+                        );
+                    }
+                });
+            }
+
+            $('.submission-row').on('click', function () {
+                openDrawer($(this).data('submission-id'));
+            });
+            $('.submission-drawer__close, .submission-drawer__backdrop').on('click', function () {
+                $('#submissionDrawer').removeClass('submission-drawer--open');
+            });
+
+            // ---- Add Result modal: category cascade ----
+            function loadCategories() {
+                $.ajax({
+                    url: '/api/v1/faculty/categories/',
+                    method: 'GET',
+                    success: function (data) {
+                        categoriesByGroup = data;
+                        var $mainSelect = $('#mainCategorySelect').empty();
+                        $mainSelect.append('<option value="" disabled selected>{% trans "Tanlang" %}</option>');
+                        $.each(data, function (groupName) {
+                            $mainSelect.append($('<option>').val(groupName).text(groupName));
+                        });
+                        $.each(data, function (groupName, categories) {
+                            $.each(categories, function (i, cat) { categoriesById[cat.id] = cat; });
+                        });
+                    }
+                });
+            }
+
+            $('#addResultModal').on('shown.bs.modal', function () {
+                if ($.isEmptyObject(categoriesByGroup)) loadCategories();
+            });
+
+            $('#mainCategorySelect').on('change', function () {
+                var groupName = $(this).val();
+                var $criterionSelect = $('#criterionSelect').empty();
+                $criterionSelect.append('<option value="" disabled selected>{% trans "Tanlang" %}</option>');
+                (categoriesByGroup[groupName] || []).forEach(function (cat) {
+                    $criterionSelect.append($('<option>').val(cat.id).text(cat.name));
+                });
+                resetCriterionDependentUI();
+            });
+
+            function resetCriterionDependentUI() {
+                $('#doiGroup, #quartileGroup, #coAuthorGroup').attr('hidden', true);
+                $('#doiInput').val('');
+                $('#doiResult').attr('hidden', true).empty();
+                selectedCoAuthors = {};
+                renderCoAuthorTags();
+                updateEstimate();
+            }
+
+            $('#criterionSelect').on('change', function () {
+                var category = categoriesById[$(this).val()];
+                resetCriterionDependentUI();
+                if (!category) return;
+
+                if (category.requires_doi) {
+                    $('#doiGroup').removeAttr('hidden');
+                    $('#quartileGroup').removeAttr('hidden');
+                }
+
+                var capacity = category.distribution === 'SOLO' ? 1 :
+                    (category.distribution === 'FLAT_TEAM' ? (category.max_co_authors || 1)
+                        : 1 + (category.max_co_authors || 0));
+                if (capacity > 1) {
+                    $('#coAuthorGroup').removeAttr('hidden');
+                    $('#coAuthorCapacityHint').text(
+                        '{% trans "Jami mualliflar" %} (' + '{% trans "siz" %} + ' + '{% trans "hammualliflar" %}): ' +
+                        '{% trans "max" %} ' + capacity
+                    );
+                }
+                updateEstimate();
+            });
+
+            // ---- DOI lookup ----
+            $('#doiFetchBtn').on('click', function () {
+                var doi = $('#doiInput').val().trim();
+                if (!doi) return;
+                var $btn = $(this).attr('disabled', true).text('...');
+                $.ajax({
+                    url: '/api/v1/faculty/doi-lookup/?doi=' + encodeURIComponent(doi),
+                    method: 'GET',
+                    success: function (data) {
+                        if (data.title) $('input[name=title]').val(data.title);
+                        $('#doiResult').removeAttr('hidden').html(
+                            '<strong>' + (data.journal || '') + '</strong><br>' +
+                            'ISSN: ' + (data.issn || '—') + ' | ' + (data.published_date || '') + '<br>' +
+                            (data.publisher || '')
+                        );
+                    },
+                    error: function () {
+                        $('#doiResult').removeAttr('hidden').text("{% trans 'DOI topilmadi' %}");
+                    },
+                    complete: function () {
+                        $btn.attr('disabled', false).text("{% trans 'Qidirish' %}");
+                    }
+                });
+            });
+
+            // ---- Co-author tagger ----
+            var coAuthorSearchTimer = null;
+            $('#coAuthorSearch').on('input', function () {
+                var query = $(this).val().trim();
+                clearTimeout(coAuthorSearchTimer);
+                if (query.length < 2) {
+                    $('#coAuthorResults').attr('hidden', true).empty();
+                    return;
+                }
+                coAuthorSearchTimer = setTimeout(function () {
+                    $.ajax({
+                        url: '/api/v1/faculty/teacher-search/?q=' + encodeURIComponent(query),
+                        method: 'GET',
+                        success: function (results) {
+                            var $box = $('#coAuthorResults').empty().removeAttr('hidden');
+                            if (!results.length) {
+                                $box.append('<div class="coauthor-search-results__item text-muted">{% trans "Topilmadi" %}</div>');
+                                return;
+                            }
+                            results.forEach(function (teacher) {
+                                var $item = $('<div class="coauthor-search-results__item">')
+                                    .text(teacher.full_name + (teacher.division_name ? ' — ' + teacher.division_name : ''))
+                                    .on('click', function () {
+                                        selectedCoAuthors[teacher.id] = teacher.full_name;
+                                        renderCoAuthorTags();
+                                        $('#coAuthorResults').attr('hidden', true).empty();
+                                        $('#coAuthorSearch').val('');
+                                    });
+                                $box.append($item);
+                            });
+                        }
+                    });
+                }, 250);
+            });
+
+            function renderCoAuthorTags() {
+                var $tags = $('#coAuthorTags').empty();
+                $.each(selectedCoAuthors, function (id, name) {
+                    var $tag = $('<span class="coauthor-tag">').text(name + ' ×').on('click', function () {
+                        delete selectedCoAuthors[id];
+                        renderCoAuthorTags();
+                    });
+                    $tags.append($tag);
+                });
+                updateEstimate();
+            }
+
+            // ---- Live score estimator ----
+            function updateEstimate() {
+                var category = categoriesById[$('#criterionSelect').val()];
+                if (!category) {
+                    $('#estimatedScoreValue').text('0');
+                    return;
+                }
+                var coAuthorCount = Object.keys(selectedCoAuthors).length;
+                var value;
+                if (category.distribution === 'WEIGHTED_SPLIT' && coAuthorCount === 0) {
+                    value = category.coef; // solo lead still gets 100%
+                } else if (category.distribution === 'FLAT_TEAM') {
+                    value = category.coef;
+                } else {
+                    value = category.coef; // lead's own share is always 100%, shown as the headline estimate
+                }
+                $('#estimatedScoreValue').text(value);
+            }
+
+            // ---- Dropzone ----
+            $('#proofFileInput').on('change', function () {
+                var $list = $('#fileList').empty();
+                $.each(this.files, function (i, file) {
+                    var sizeOk = file.size <= 15 * 1024 * 1024;
+                    $list.append(
+                        '<div class="file-list__item' + (sizeOk ? '' : ' file-list__item--error') + '">' +
+                        file.name + (sizeOk ? '' : ' — {% trans "15MB dan katta" %}') +
+                        '</div>'
+                    );
+                });
+            });
+
+            // ---- Submit ----
+            $('#addResultForm').on('submit', function (event) {
+                event.preventDefault();
+                var $error = $('#addResultError').attr('hidden', true);
+                var $submit = $('#addResultSubmit').attr('disabled', true);
+
+                var formData = new FormData(this);
+                $.each(selectedCoAuthors, function (id) { formData.append('co_authors', id); });
+                $.each(document.getElementById('proofFileInput').files, function (i, file) {
+                    formData.append('files', file);
+                });
+
+                $.ajax({
+                    url: '/api/v1/faculty/submissions/',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: apiHeaders(),
+                    success: function () {
+                        window.location.reload();
+                    },
+                    error: function (xhr) {
+                        var messages = [];
+                        (function flatten(value) {
+                            if ($.isArray(value)) {
+                                value.forEach(flatten);
+                            } else if (value && typeof value === 'object') {
+                                $.each(value, function (_, v) { flatten(v); });
+                            } else if (value) {
+                                messages.push(value);
+                            }
+                        })(xhr.responseJSON);
+                        $error.text(messages.join(' ') || "{% trans 'Xatolik yuz berdi' %}").removeAttr('hidden');
+                    },
+                    complete: function () {
+                        $submit.attr('disabled', false);
+                    }
+                });
+            });
+        })(jQuery);
+    </script>
 {% endblock %}
