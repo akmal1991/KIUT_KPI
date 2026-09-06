@@ -5,6 +5,7 @@
 # self_submittable) drive the faculty submission modal's Indicator Picker and
 # its live score estimator; they carry no meaning for the pre-existing
 # admin-authored Post flow, which ignores them.
+from django.contrib.auth.hashers import make_password
 from django.db import migrations
 
 SOLO = 'SOLO'
@@ -106,7 +107,7 @@ def seed_categories(apps, schema_editor):
         system_user = User.objects.create(
             username='system', email='system@kiut.uz', role='SYSTEM', is_staff=False, is_active=True,
         )
-        system_user.set_unusable_password()
+        system_user.password = make_password(None)
         system_user.save()
 
     groups_by_name = {}
