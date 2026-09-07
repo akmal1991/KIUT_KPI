@@ -1,7 +1,7 @@
 body {
     font-family: 'HelveticaNeueCyr', sans-serif;
     font-weight: 300;
-    background: #F8FAFC;
+    background: #ffffff;
 }
 
 .wrapper {
@@ -25,7 +25,7 @@ a, a:hover {
 .home-header {
     width: 100%;
     z-index: 9;
-    background: #002B49;
+    background: #404040;
 }
 
 .header-main {
@@ -124,14 +124,14 @@ a, a:hover {
 .header-lang .dropdown-item {
     width: 36px;
     height: 36px;
-    border: 1px solid #00A8CC;
+    border: 1px solid #0096db;
     background-color: transparent;
     border-radius: 50%;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #00A8CC;
+    background: #0096db;
     text-transform: capitalize;
     color: #ffffff;
     font-weight: 300;
@@ -149,25 +149,11 @@ a, a:hover {
 .header-btn .btn {
     width: 185px;
     height: 36px;
-    background-color: #00A8CC;
+    background-color: #0096db;
     border-radius: 18px;
     color: #ffffff;
     font-size: 17px;
     line-height: 22px;
-}
-
-.btn-secondary {
-    background-color: #00A8CC;
-    border-color: #00A8CC;
-    color: #FFFFFF;
-}
-
-.btn-secondary:hover,
-.btn-secondary:focus,
-.btn-secondary:active {
-    background-color: #0093B3;
-    border-color: #0093B3;
-    color: #FFFFFF;
 }
 
 .header-lang .dropdown-toggle::after {
@@ -221,7 +207,7 @@ a, a:hover {
 }
 
 .profile-info__main h3 {
-    color: #1E293B;
+    color: #282828;
     font-weight: 400;
     font-size: 19px;
     line-height: 22px;
@@ -229,7 +215,7 @@ a, a:hover {
 }
 
 .profile-info__main span {
-    color: #64748B;
+    color: #888888;
 }
 
 
@@ -246,11 +232,11 @@ a, a:hover {
 .profile-title h2 {
     font-size: 28px;
     margin-bottom: 0;
-    color: #1E293B;
+    color: #282828;
 }
 
 figure.highcharts-figure {
-    border: 1px solid #E2E8F0;
+    border: 1px solid #dedede;
     border-radius: 0.25rem;
     margin: 0;
 }
@@ -278,7 +264,7 @@ figure.highcharts-figure #container {
 }
 
 .categories h3 {
-    color: #1E293B;
+    color: #282828;
     font-size: 24px;
     line-height: 28px;
     margin-bottom: 12px;
@@ -297,12 +283,12 @@ figure.highcharts-figure #container {
 
 .categories ul li {
     font-size: 17px;
-    color: #1E293B;
+    color: #111111;
     margin-bottom: 5px;
 }
 
 .categories ul li strong {
-    color: #00A8CC;
+    color: #0096db;
 }
 
 .works-table {
@@ -310,17 +296,13 @@ figure.highcharts-figure #container {
 }
 
 .works-table > h3 {
-    color: #1E293B;
+    color: #282828;
     font-size: 24px;
     margin-bottom: 15px;
 }
 
 .works-table table {
     background: #ffffff;
-}
-
-.works-table table thead th {
-    color: #64748B;
 }
 
 .table-name {
@@ -330,13 +312,13 @@ figure.highcharts-figure #container {
 .table-name p {
     font-size: 17px;
     line-height: 19px;
-    color: #1E293B;
+    color: #111111;
     margin-bottom: 5px;
     font-weight: 400;
 }
 
 .table-name span {
-    color: #64748B;
+    color: #888888;
     font-size: 15px;
 }
 
@@ -398,9 +380,7 @@ figure.highcharts-figure #container {
 }
 
 .block-grey {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    background: #f7f7f7;
     border-radius: 4px;
     padding: 20px;
     margin-bottom: 30px;
@@ -408,7 +388,7 @@ figure.highcharts-figure #container {
 }
 
 .block-grey__title {
-    color: #1E293B;
+    color: #282828;
     font-size: 27px;
     margin-bottom: 30px;
 }
@@ -450,16 +430,16 @@ figure.highcharts-figure #container {
     font-size: 18px;
     font-weight: 400;
     margin: 0;
-    color: #1E293B;
+    color: #282828;
 }
 
 .top-item__info span {
-    color: #64748B;
+    color: #808080;
     margin-right: 5px;
 }
 
 .top-item__info strong {
-    color: #00A8CC;
+    color: #0096db;
 }
 
 .table td, .table th {
@@ -521,7 +501,7 @@ figure.highcharts-figure #container {
 }
 
 .profile-footer p strong {
-    color: #00A8CC;
+    color: #0080bb;
 }
 
 
@@ -536,18 +516,15 @@ figure.highcharts-figure #container {
     font-size: 18px;
     font-weight: 400;
     line-height: 24px;
-    color: #FFFFFF;
+    color: #ffffff;
     position: relative;
     overflow: hidden;
     margin-left: 45px;
-    padding-bottom: 8px;
-    border-bottom: 3px solid transparent;
 }
 
 .menu__item:hover,
 .menu__item_active {
-    color: #FFFFFF;
-    border-bottom-color: #00A8CC;
+    color: #84d8ff;
 }
 
 /**
@@ -612,7 +589,7 @@ figure.highcharts-figure #container {
     right: 0;
     bottom: 0;
     left: 0;
-    background: #002B49;
+    background: #404040;
     overflow: hidden;
     z-index: 200;
 }
