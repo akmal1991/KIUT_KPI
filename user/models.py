@@ -1,10 +1,8 @@
 import datetime
 
-from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Count, F, Sum, Q
-from django.utils import timezone
 
 
 class Division(models.Model):
@@ -61,22 +59,12 @@ class User(AbstractUser):
         ADMIN = 'ADMIN', 'Administrator'
         SYSTEM = 'SYSTEM', 'System'
 
-    class Status(models.TextChoices):
-        PENDING_VERIFICATION = 'PENDING_VERIFICATION', 'Pending verification'
-        ACTIVE = 'ACTIVE', 'Active'
-        SUSPENDED = 'SUSPENDED', 'Suspended'
-
     father_name = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(upload_to='profile/images/', null=True, blank=True)
     birth = models.DateField(null=True, blank=True)
     division = models.ForeignKey(Division, null=True, blank=True, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    phone = models.CharField(max_length=255, null=True, blank=True)
     role = models.CharField(max_length=32, choices=Role.choices, default=Role.FACULTY)
-    status = models.CharField(max_length=32, choices=Status.choices, default=Status.ACTIVE)
-    email = models.EmailField(unique=True, blank=True)
-    teacher_profile = models.OneToOneField(
-        'Teacher', null=True, blank=True, on_delete=models.SET_NULL, related_name='user_account',
-    )
 
 
 class Teacher(models.Model):
@@ -190,57 +178,3 @@ class ControlLimit(models.Model):
 
     def __str__(self):
         return '%s - %s' % (self.low_limit, self.high_limit)
-
-
-class EmailOTP(models.Model):
-    """A one-time verification code for a User.email, used to activate a
-    self-registered faculty account. The code is never stored in plaintext —
-    only its Django password hash (PBKDF2-SHA256), the same hasher used for
-    account passwords."""
-
-    MAX_ATTEMPTS = 5
-    VALIDITY_MINUTES = 10
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_codes')
-    code_hash = models.CharField(max_length=255)
-    expires_at = models.DateTimeField()
-    is_used = models.BooleanField(default=False)
-    attempts = models.PositiveSmallIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created']
-
-    @classmethod
-    def issue(cls, user):
-        """Generates a fresh 6-digit code for `user`, stores its hash, and
-        returns the plaintext code (the only time it ever exists as plaintext)."""
-        import secrets
-        raw_code = f"{secrets.randbelow(1_000_000):06d}"
-        otp = cls.objects.create(
-            user=user,
-            code_hash=make_password(raw_code),
-            expires_at=timezone.now() + datetime.timedelta(minutes=cls.VALIDITY_MINUTES),
-        )
-        return otp, raw_code
-
-    def is_expired(self):
-        return timezone.now() >= self.expires_at
-
-    def is_exhausted(self):
-        return self.attempts >= self.MAX_ATTEMPTS
-
-    def check_code(self, raw_code):
-        """Verifies raw_code against the stored hash and records the attempt.
-        Returns True only for a correct, unused, unexpired, non-exhausted code."""
-        if self.is_used or self.is_expired() or self.is_exhausted():
-            return False
-        self.attempts += 1
-        matched = check_password(raw_code, self.code_hash)
-        if matched:
-            self.is_used = True
-        self.save(update_fields=['attempts', 'is_used'])
-        return matched
-
-    def __str__(self):
-        return f"OTP for {self.user.email} (used={self.is_used}, expires={self.expires_at})"

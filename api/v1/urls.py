@@ -7,6 +7,5 @@ urlpatterns = [
     path('division/', include('api.v1.division.urls')),
     path('user/', include('api.v1.user.urls')),
     path('post/', include('api.v1.post.urls')),
-    path('auth/', include('api.v1.auth.urls')),
 
 ]
