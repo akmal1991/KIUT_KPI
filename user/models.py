@@ -52,19 +52,11 @@ class AcademicLevel(models.Model):
 
 
 class User(AbstractUser):
-    class Role(models.TextChoices):
-        FACULTY = 'FACULTY', 'Faculty'
-        DEPARTMENT_REVIEWER = 'DEPARTMENT_REVIEWER', 'Department Reviewer'
-        SCIENTIFIC_DEPT_REVIEWER = 'SCIENTIFIC_DEPT_REVIEWER', 'Scientific Department Reviewer'
-        ADMIN = 'ADMIN', 'Administrator'
-        SYSTEM = 'SYSTEM', 'System'
-
     father_name = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(upload_to='profile/images/', null=True, blank=True)
     birth = models.DateField(null=True, blank=True)
     division = models.ForeignKey(Division, null=True, blank=True, on_delete=models.CASCADE)
     phone = models.CharField(max_length=255, null=True, blank=True)
-    role = models.CharField(max_length=32, choices=Role.choices, default=Role.FACULTY)
 
 
 class Teacher(models.Model):

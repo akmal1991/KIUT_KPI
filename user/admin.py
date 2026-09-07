@@ -21,16 +21,7 @@ class TeacherAdmin(admin.ModelAdmin):
     search_fields = ['id', 'first_name', 'last_name', 'father_name']
 
 
-@admin.register(User)
-class KiutUserAdmin(UserAdmin):
-    list_display = UserAdmin.list_display + ('role',)
-    list_filter = UserAdmin.list_filter + ('role',)
-    fieldsets = UserAdmin.fieldsets + (
-        ('KIUT role', {'fields': ('role', 'division', 'father_name', 'image', 'birth', 'phone')}),
-    )
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ('KIUT role', {'fields': ('role',)}),
-    )
+admin.site.register(User, UserAdmin)
 admin.site.register(Division, TranslationAdmin)
 admin.site.register(ControlLimit)
 admin.site.register(TeacherLevel, TranslationAdmin)
