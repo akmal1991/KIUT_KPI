@@ -42,17 +42,9 @@ class Post(models.Model):
     class Meta:
         ordering = ['-date', ]
 
-    QUARTILE_CHOICES = (
-        ('Q1', 'Q1'),
-        ('Q2', 'Q2'),
-        ('Q3', 'Q3'),
-        ('Q4', 'Q4'),
-    )
-
     STATUS_CHOICES = (
         (1, 'На рассмотрении'),
         (2, 'Одобрено'),
-        (3, 'Отклонено'),
     )
     title = models.CharField(max_length=255)
     body = models.TextField()
@@ -67,22 +59,6 @@ class Post(models.Model):
     updated = models.DateTimeField(auto_now=True)
     target = models.ForeignKey(Target, on_delete=models.SET_NULL, null=True, blank=True)
     academic_years = models.ForeignKey(AcademicYear, null=True, blank=True, on_delete=models.SET_NULL)
-
-    # Faculty self-submission workflow (DOI-backed research entries, review trail).
-    doi = models.CharField(max_length=255, null=True, blank=True)
-    quartile = models.CharField(max_length=2, choices=QUARTILE_CHOICES, null=True, blank=True)
-    estimated_score = models.FloatField(
-        null=True, blank=True,
-        help_text="Computed at submission time from the category rule and the submitter's author share.",
-    )
-    validated_score = models.FloatField(
-        null=True, blank=True, help_text="Set by the reviewer at approval time; may differ from the estimate.",
-    )
-    review_comment = models.TextField(null=True, blank=True)
-    reviewed_by = models.ForeignKey(
-        User, null=True, blank=True, on_delete=models.SET_NULL, related_name='reviewed_posts',
-    )
-    reviewed_at = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.date:
@@ -102,26 +78,6 @@ class Post(models.Model):
 
     def __str__(self):
         return "%s: %s (%s)" % (self.teacher.get_full_name(), self.title, self.category.name)
-
-
-class PostCoAuthor(models.Model):
-    class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pending'
-        CONFIRMED = 'CONFIRMED', 'Confirmed'
-        REJECTED = 'REJECTED', 'Rejected'
-
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='co_authors')
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='co_author_requests')
-    share_percent = models.FloatField()
-    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
-    requested_at = models.DateTimeField(auto_now_add=True)
-    responded_at = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        unique_together = ('post', 'teacher')
-
-    def __str__(self):
-        return f"{self.teacher} on {self.post_id} ({self.status})"
 
 
 class Document(models.Model):

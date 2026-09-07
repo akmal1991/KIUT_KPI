@@ -8,6 +8,5 @@ urlpatterns = [
     path('user/', include('api.v1.user.urls')),
     path('post/', include('api.v1.post.urls')),
     path('auth/', include('api.v1.auth.urls')),
-    path('faculty/', include('api.v1.faculty.urls')),
 
 ]
