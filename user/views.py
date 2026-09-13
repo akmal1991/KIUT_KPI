@@ -378,6 +378,10 @@ class TeacherSubmissionForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['category', 'title', 'date']
+        # type="date" makes the browser render a real calendar picker and
+        # always submit ISO format (YYYY-MM-DD), avoiding locale-dependent
+        # text parsing that rejected e.g. "24.11.2026" as invalid.
+        widgets = {'date': forms.DateInput(attrs={'type': 'date'})}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -76,6 +76,8 @@
                                 <a class="dropdown-item" href="{% url 'logout' %}">{% trans 'Chiqish' %}</a>
                             </div>
                         </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-secondary">{% trans 'Kirish' %}</a>
                     {% endif %}
                     <div class="header-lang">
 
