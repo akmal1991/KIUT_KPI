@@ -112,10 +112,12 @@ class Category(models.Model):
         return coef
 
     def get_total_ball(self):
-        return round(self.coef * self.post_set.count(), 2)
+        return round(self.coef * self.post_set.filter(status=2).count(), 2)
 
     def get_total_ball_date(self, academic_year):
-        return round(self.coef * self.post_set.filter(academic_years=academic_year).distinct().count(), 2)
+        return round(
+            self.coef * self.post_set.filter(academic_years=academic_year, status=2).distinct().count(), 2,
+        )
 
     @classmethod
     def get_categories_many_of_limit(cls, academic_year_id=None):

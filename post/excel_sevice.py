@@ -70,7 +70,7 @@ def excel_writer(academic_years):
 
         i = 0
         for academic_year in academic_years:
-            post_count = category.post_set.filter(academic_years=academic_year).distinct().count()
+            post_count = category.post_set.filter(academic_years=academic_year, status=2).distinct().count()
             total_sum = round(category.get_coef(academic_year) * post_count, 2)
 
             worksheet.set_column(f'{column[i]}{c}:{column[i]}{c}', 10)
@@ -152,7 +152,7 @@ def excel_teachers(academic_year, division, name, uuid, level, order_by):
                     default=F('post__category__coef'),
                     output_field=FloatField()
                 ),
-                filter=Q(post__academic_years=academic_year) | Q(post__category__id=29)
+                filter=(Q(post__academic_years=academic_year) | Q(post__category__id=29)) & Q(post__status=2)
             ),
             0,  # Default value if no coefficient is found
             output_field=FloatField()
@@ -181,7 +181,7 @@ def excel_teachers(academic_year, division, name, uuid, level, order_by):
     c = 3
     for teacher in teachers.distinct():
         post_count = teacher.post_set.filter(
-            Q(academic_years=academic_year) | Q(category__id=29)
+            (Q(academic_years=academic_year) | Q(category__id=29)) & Q(status=2)
         ).distinct().count()
         worksheet.write(f'A{c}', c - 2, text_format)
         worksheet.write(f'B{c}', f'{teacher.uuid}', text_format)
@@ -266,7 +266,7 @@ def excel_teachers_form2(academic_year, division, name, uuid, level, order_by):
                     default=F('post__category__coef'),
                     output_field=FloatField()
                 ),
-                filter=Q(post__academic_years=academic_year) | Q(post__category__id=29)
+                filter=(Q(post__academic_years=academic_year) | Q(post__category__id=29)) & Q(post__status=2)
             ),
             0,  # Default value if no coefficient is found
             output_field=FloatField()
@@ -295,7 +295,7 @@ def excel_teachers_form2(academic_year, division, name, uuid, level, order_by):
     c = 3
     for teacher in teachers.distinct():
         post_count = teacher.post_set.filter(
-            Q(academic_years=academic_year) | Q(category__id=29)
+            (Q(academic_years=academic_year) | Q(category__id=29)) & Q(status=2)
         ).distinct().count()
         worksheet.write(f'A{c}', c - 2, text_format)
         worksheet.write(f'B{c}', f'{teacher.uuid}', text_format)

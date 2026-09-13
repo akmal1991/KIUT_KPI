@@ -52,11 +52,23 @@ class AcademicLevel(models.Model):
 
 
 class User(AbstractUser):
+    class Role(models.TextChoices):
+        FACULTY = 'FACULTY', 'Faculty'
+        INSPECTOR = 'INSPECTOR', 'Inspector'
+        ADMIN = 'ADMIN', 'Administrator'
+
     father_name = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(upload_to='profile/images/', null=True, blank=True)
     birth = models.DateField(null=True, blank=True)
     division = models.ForeignKey(Division, null=True, blank=True, on_delete=models.CASCADE)
     phone = models.CharField(max_length=255, null=True, blank=True)
+    role = models.CharField(max_length=32, choices=Role.choices, default=Role.FACULTY)
+    teacher_profile = models.OneToOneField(
+        'Teacher', null=True, blank=True, on_delete=models.SET_NULL, related_name='user_account',
+    )
+    # Set when an admin issues a default password for a teacher account
+    # (see user.admin.TeacherAdmin); cleared once the user sets their own.
+    must_change_password = models.BooleanField(default=False)
 
 
 class Teacher(models.Model):
@@ -103,7 +115,7 @@ class Teacher(models.Model):
 
     def get_total_ball(self):
         sum_ball = 0
-        for post in self.post_set.all():
+        for post in self.post_set.filter(status=2):
             sum_ball += post.category.get_coef()
         return round(sum_ball, 1)
 
@@ -112,7 +124,7 @@ class Teacher(models.Model):
         academic_year = AcademicYear.objects.filter(id=academic_id).last()
         sum_bal = 0
         for post in self.post_set.filter(
-                Q(academic_years=academic_year) | Q(category__id=29)).distinct():
+                Q(academic_years=academic_year) | Q(category__id=29), status=2).distinct():
             sum_bal += post.category.get_coef(academic_year=academic_year)
         return round(sum_bal, 1)
 
@@ -122,10 +134,13 @@ class Teacher(models.Model):
         sum_bal = 0
         if group_id == 3:
             posts = self.post_set.filter(
-                Q(category__group_id=group_id) & Q(academic_years=academic_year) | Q(category__id=29)
+                (Q(category__group_id=group_id) & Q(academic_years=academic_year) | Q(category__id=29)),
+                status=2,
             ).distinct()
         else:
-            posts = self.post_set.filter(Q(category__group_id=group_id) & Q(academic_years=academic_year)).distinct()
+            posts = self.post_set.filter(
+                Q(category__group_id=group_id) & Q(academic_years=academic_year), status=2,
+            ).distinct()
 
         for post in posts:
             sum_bal += post.category.get_coef(academic_year=academic_year)

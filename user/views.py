@@ -1,12 +1,17 @@
 import datetime
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django import forms
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import Group
+from django.contrib.auth.views import PasswordChangeView
 from django.db.models import Q, Sum
+from django.urls import reverse_lazy
 from django.views import generic
 
-from post.models import Post, AcademicYear
-from user.models import Teacher, Division, TeacherLevel, AcademicLevel
+from post.models import Document, Post, AcademicYear
+from post.review import reviewer_visible_posts
+from user.models import Teacher, Division, TeacherLevel, AcademicLevel, User
 from category.models import Category
 
 
@@ -196,12 +201,15 @@ class TeacherPublicListView(generic.ListView):
             teachers = teachers.filter(Q(first_name__icontains=name) |
                                        Q(last_name__icontains=name) |
                                        Q(father_name__contains=name))
+        approved_only = Q(post__status=2)
         if self.request.GET.get('order_by') == 'ball_asc':
-            return teachers.annotate(total_ball=Sum('post__category__coef')).order_by('total_ball')
+            return teachers.annotate(total_ball=Sum('post__category__coef', filter=approved_only)).order_by(
+                'total_ball')
         if self.request.GET.get('order_by') == 'ball_desc':
-            return teachers.annotate(total_ball=Sum('post__category__coef')).order_by('-total_ball')
-        return teachers.annotate(total_ball=Sum('post__category__coef')).order_by('last_name', 'first_name',
-                                                                                  'father_name', '-total_ball')
+            return teachers.annotate(total_ball=Sum('post__category__coef', filter=approved_only)).order_by(
+                '-total_ball')
+        return teachers.annotate(total_ball=Sum('post__category__coef', filter=approved_only)).order_by(
+            'last_name', 'first_name', 'father_name', '-total_ball')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(TeacherPublicListView, self).get_context_data(**kwargs)
@@ -261,13 +269,14 @@ class DivisionPublicListView(generic.ListView):
         division_list = division_list.filter(
             Q(teacher__post__date__gte=start_date) & Q(teacher__post__date__lte=end_date) | Q(
                 teacher__post__category__id=29)).distinct()
-        division_list = division_list.annotate(total_coef=Sum('teacher__post__category__coef'),
-                                               academ_ball=Sum('teacher__post__category__coef', filter=Q(
-                                                   teacher__post__category__group=Group.objects.get(id=3))),
-                                               scien_ball=Sum('teacher__post__category__coef', filter=Q(
-                                                   teacher__post__category__group=Group.objects.get(id=2))),
-                                               org_ball=Sum('teacher__post__category__coef', filter=Q(
-                                                   teacher__post__category__group=Group.objects.get(id=1))))
+        division_list = division_list.annotate(
+            total_coef=Sum('teacher__post__category__coef', filter=Q(teacher__post__status=2)),
+            academ_ball=Sum('teacher__post__category__coef', filter=Q(
+                teacher__post__category__group=Group.objects.get(id=3), teacher__post__status=2)),
+            scien_ball=Sum('teacher__post__category__coef', filter=Q(
+                teacher__post__category__group=Group.objects.get(id=2), teacher__post__status=2)),
+            org_ball=Sum('teacher__post__category__coef', filter=Q(
+                teacher__post__category__group=Group.objects.get(id=1), teacher__post__status=2)))
 
         if self.request.GET.get('name'):
             return division_list.filter(name__icontains=self.request.GET.get('name')).order_by('-total_coef')
@@ -299,4 +308,114 @@ class DivisionPublicDetailView(generic.DetailView):
             context['category_list'].append({'category': category,
                                              'count': category.post_set.filter(
                                                  teacher__division=self.object).distinct().count()})
+        return context
+
+
+class ReviewerRequiredMixin(UserPassesTestMixin):
+    """Restricts a view to INSPECTOR accounts (or superusers)."""
+
+    def test_func(self):
+        user = self.request.user
+        return user.is_superuser or user.role == User.Role.INSPECTOR
+
+
+class ReviewDashboardView(LoginRequiredMixin, ReviewerRequiredMixin, generic.TemplateView):
+    """Lists submissions for an Inspector to approve or reject. Listing is
+    server-rendered; the decision itself goes through
+    api.v1.review.SubmissionDecisionView."""
+
+    template_name = 'public/review/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        submissions = reviewer_visible_posts(self.request.user).select_related(
+            'category', 'teacher', 'reviewed_by',
+        ).order_by('-date')
+
+        status_filter = self.request.GET.get('status', '1')
+        if status_filter:
+            submissions = submissions.filter(status=status_filter)
+        if self.request.GET.get('academic_year'):
+            submissions = submissions.filter(academic_years_id=self.request.GET['academic_year'])
+
+        context['submissions'] = submissions
+        context['status_filter'] = status_filter
+        context['academic_year_list'] = AcademicYear.objects.all()
+        context['pending_count'] = reviewer_visible_posts(self.request.user).filter(status=1).count()
+        return context
+
+
+class StyledPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.setdefault('class', 'form-control')
+
+
+class ForcedPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    """Where every admin-issued default password (see user.admin.TeacherAdmin)
+    sends the teacher on next login, via ForcePasswordChangeMiddleware."""
+
+    template_name = 'public/user/password_change.html'
+    form_class = StyledPasswordChangeForm
+    success_url = reverse_lazy('user_public:password_change_done')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.user.must_change_password:
+            self.request.user.must_change_password = False
+            self.request.user.save(update_fields=['must_change_password'])
+        return response
+
+
+class ForcedPasswordChangeDoneView(LoginRequiredMixin, generic.TemplateView):
+    template_name = 'public/user/password_change_done.html'
+
+
+class TeacherSubmissionForm(forms.ModelForm):
+    file = forms.FileField(required=False, help_text="Tasdiqlovchi hujjat (ixtiyoriy).")
+
+    class Meta:
+        model = Post
+        fields = ['category', 'title', 'date']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].queryset = Category.objects.filter(is_delete=False)
+        for name, field in self.fields.items():
+            if name != 'file':
+                field.widget.attrs.setdefault('class', 'form-control')
+
+
+class TeacherRequiredMixin(UserPassesTestMixin):
+    """Restricts a view to accounts with a linked Teacher profile."""
+
+    def test_func(self):
+        return getattr(self.request.user, 'teacher_profile', None) is not None
+
+
+class TeacherSubmissionView(LoginRequiredMixin, TeacherRequiredMixin, generic.CreateView):
+    """Minimal self-service page: a teacher submits a new result (goes into
+    the pending queue for Inspector review) and sees their own submissions."""
+
+    template_name = 'public/teacher/submissions.html'
+    form_class = TeacherSubmissionForm
+    success_url = reverse_lazy('user_public:teacher_submissions')
+
+    def form_valid(self, form):
+        form.instance.teacher = self.request.user.teacher_profile
+        form.instance.author = self.request.user
+        form.instance.body = form.instance.title
+        form.instance.status = 1
+        response = super().form_valid(form)
+        uploaded_file = form.cleaned_data.get('file')
+        if uploaded_file:
+            Document.objects.create(post=self.object, file=uploaded_file, author=self.request.user)
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['submissions'] = Post.objects.filter(
+            teacher=self.request.user.teacher_profile,
+        ).order_by('-date')
         return context

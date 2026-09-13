@@ -1,0 +1,69 @@
+{% extends 'base_public.html' %}
+{% load i18n %}
+
+{% block content %}
+    <section class="home">
+        <div class="container">
+            <div class="block-grey" style="max-width:600px;margin:0 auto 30px;">
+                <h2 class="block-grey__title">{% trans 'Yangi natija topshirish' %}</h2>
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-secondary btn-block">{% trans 'Yuborish' %}</button>
+                </form>
+            </div>
+
+            <div class="block-grey">
+                <h2 class="block-grey__title">{% trans 'Mening arizalarim' %}</h2>
+                <div class="works-table p-0 overflow-auto">
+                    <table class="table submissions-table">
+                        <thead class="thead-light">
+                        <tr>
+                            <th width="1%">#</th>
+                            <th>{% trans 'KPI mezoni' %}</th>
+                            <th>{% trans 'Sarlavha' %}</th>
+                            <th class="text-center">{% trans 'Status' %}</th>
+                            <th class="text-center">{% trans 'Sana' %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for post in submissions %}
+                            <tr>
+                                <th>{{ forloop.counter }}</th>
+                                <td>{{ post.category.name }}</td>
+                                <td>{{ post.title }}</td>
+                                <td class="text-center">
+                                    {% if post.status == 1 %}
+                                        <span class="status-badge status-badge--pending">{% trans 'Kutilmoqda' %}</span>
+                                    {% elif post.status == 2 %}
+                                        <span class="status-badge status-badge--approved">{% trans 'Tasdiqlangan' %}</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--rejected"
+                                              title="{{ post.review_comment }}">{% trans 'Rad etilgan' %}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ post.date }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5">{% trans "Hozircha arizalar yo'q" %}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

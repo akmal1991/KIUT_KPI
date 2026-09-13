@@ -60,6 +60,23 @@
                     </div>
                 </div>
                 <div class="header-right">
+                    {% if request.user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" id="dropdownAccount" data-toggle="dropdown">
+                                {{ request.user.get_full_name|default:request.user.username }}
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownAccount">
+                                {% if request.user.is_superuser or request.user.role == 'INSPECTOR' %}
+                                    <a class="dropdown-item" href="{% url 'user_public:review_dashboard' %}">{% trans 'Tekshirish' %}</a>
+                                {% endif %}
+                                {% if request.user.teacher_profile %}
+                                    <a class="dropdown-item" href="{% url 'user_public:teacher_submissions' %}">{% trans 'Natija topshirish' %}</a>
+                                {% endif %}
+                                <a class="dropdown-item" href="{% url 'user_public:password_change' %}">{% trans 'Parolni almashtirish' %}</a>
+                                <a class="dropdown-item" href="{% url 'logout' %}">{% trans 'Chiqish' %}</a>
+                            </div>
+                        </div>
+                    {% endif %}
                     <div class="header-lang">
 
                         <div class="dropdown">

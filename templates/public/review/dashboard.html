@@ -1,0 +1,119 @@
+{% extends 'base_public.html' %}
+{% load i18n %}
+
+{% block content %}
+    <section class="home">
+        <div class="container">
+            <div class="block-grey">
+                <h2 class="block-grey__title">{% trans 'Tekshirish uchun arizalar' %} ({{ pending_count }})</h2>
+
+                <form method="get" class="form-row submissions-filters">
+                    <div class="form-group col-md-3">
+                        <select name="status" class="form-control" onchange="this.form.submit()">
+                            <option value="1" {% if status_filter == '1' %}selected{% endif %}>{% trans 'Kutilmoqda' %}</option>
+                            <option value="2" {% if status_filter == '2' %}selected{% endif %}>{% trans 'Tasdiqlangan' %}</option>
+                            <option value="3" {% if status_filter == '3' %}selected{% endif %}>{% trans 'Rad etilgan' %}</option>
+                            <option value="" {% if status_filter == '' %}selected{% endif %}>{% trans 'Barchasi' %}</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <select name="academic_year" class="form-control" onchange="this.form.submit()">
+                            <option value="">{% trans 'Barcha yillar' %}</option>
+                            {% for year in academic_year_list %}
+                                <option value="{{ year.id }}" {% if request.GET.academic_year == year.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ year.years }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+
+                <div class="works-table p-0 overflow-auto">
+                    <table class="table submissions-table">
+                        <thead class="thead-light">
+                        <tr>
+                            <th width="1%">#</th>
+                            <th>{% trans "O'qituvchi" %}</th>
+                            <th>{% trans 'KPI mezoni' %}</th>
+                            <th>{% trans 'Sarlavha' %}</th>
+                            <th class="text-center">{% trans 'Status' %}</th>
+                            <th class="text-center">{% trans 'Sana' %}</th>
+                            <th class="text-center">{% trans 'Amallar' %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for post in submissions %}
+                            <tr data-post-id="{{ post.id }}">
+                                <th>{{ forloop.counter }}</th>
+                                <td>{{ post.teacher.get_full_name }}</td>
+                                <td>{{ post.category.name }}</td>
+                                <td>{{ post.title }}</td>
+                                <td class="text-center">
+                                    {% if post.status == 1 %}
+                                        <span class="status-badge status-badge--pending">{% trans 'Kutilmoqda' %}</span>
+                                    {% elif post.status == 2 %}
+                                        <span class="status-badge status-badge--approved">{% trans 'Tasdiqlangan' %}</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--rejected">{% trans 'Rad etilgan' %}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ post.date }}</td>
+                                <td class="text-center">
+                                    {% if post.status == 1 %}
+                                        <button type="button" class="btn btn-sm btn-secondary review-approve">{% trans 'Tasdiqlash' %}</button>
+                                        <button type="button" class="btn btn-sm btn-link review-reject">{% trans 'Rad etish' %}</button>
+                                    {% else %}
+                                        &mdash;
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7">{% trans "Hozircha arizalar yo'q" %}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block js %}
+    <script>
+        (function ($) {
+            'use strict';
+            var CSRF_TOKEN = "{{ csrf_token }}";
+
+            function decide(postId, action, comment) {
+                $.ajax({
+                    url: '/api/v1/review/submissions/' + postId + '/decide/',
+                    method: 'POST',
+                    headers: {"X-CSRFToken": CSRF_TOKEN},
+                    data: {action: action, comment: comment || ''},
+                    success: function () {
+                        window.location.reload();
+                    },
+                    error: function (xhr) {
+                        var detail = xhr.responseJSON && (xhr.responseJSON.comment || xhr.responseJSON.detail);
+                        alert(detail || '{% trans "Xatolik yuz berdi" %}');
+                    }
+                });
+            }
+
+            $('.review-approve').on('click', function () {
+                var postId = $(this).closest('tr').data('post-id');
+                if (!confirm('{% trans "Ushbu arizani tasdiqlaysizmi?" %}')) return;
+                decide(postId, 'approve', '');
+            });
+
+            $('.review-reject').on('click', function () {
+                var postId = $(this).closest('tr').data('post-id');
+                var comment = prompt('{% trans "Rad etish sababi:" %}');
+                if (comment === null) return;
+                decide(postId, 'reject', comment);
+            });
+        })(jQuery);
+    </script>
+{% endblock %}

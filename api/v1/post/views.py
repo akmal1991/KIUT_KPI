@@ -88,14 +88,14 @@ class PostReportView(APIView):
                 if group.id == 3:  # id 3 - Академический
                     for post in Post.objects.filter(
                             (Q(date__gte=from_date, date__lt=next_month) & Q(category__group=group))
-                            & ~Q(category_id=29)).distinct():  # TODO id 29 - стартовый бал фильтр
+                            & ~Q(category_id=29), status=2).distinct():  # TODO id 29 - стартовый бал фильтр
                         # if post.category.get_coef(academic_year) > 0:
                         ball += post.category.get_coef(academic_year)
                         # else:
                         #     minus_ball -= post.category.get_coef(academic_year)
                 else:
                     for post in Post.objects.filter(Q(date__gte=from_date, date__lt=next_month) & Q(
-                            category__group=group)):  # TODO id 29 - стартовый бал фильтр
+                            category__group=group), status=2):  # TODO id 29 - стартовый бал фильтр
                         ball += post.category.get_coef(academic_year)
 
                 from_date = next_month

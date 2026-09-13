@@ -45,6 +45,7 @@ class Post(models.Model):
     STATUS_CHOICES = (
         (1, 'На рассмотрении'),
         (2, 'Одобрено'),
+        (3, 'Отклонено'),
     )
     title = models.CharField(max_length=255)
     body = models.TextField()
@@ -59,6 +60,13 @@ class Post(models.Model):
     updated = models.DateTimeField(auto_now=True)
     target = models.ForeignKey(Target, on_delete=models.SET_NULL, null=True, blank=True)
     academic_years = models.ForeignKey(AcademicYear, null=True, blank=True, on_delete=models.SET_NULL)
+
+    # Inspector review trail.
+    review_comment = models.TextField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name='reviewed_posts',
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.date:
