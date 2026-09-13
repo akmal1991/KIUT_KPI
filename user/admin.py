@@ -91,6 +91,10 @@ class TeacherAdmin(admin.ModelAdmin):
             if username:
                 User.objects.create(
                     username=username,
+                    # A leftover unique constraint on email predates this feature (from a
+                    # reverted migration never rolled back); a synthetic per-account
+                    # address avoids colliding with it without touching that schema.
+                    email=f'{username}@kiut.local',
                     password=make_password(password or _generate_default_password()),
                     role=User.Role.FACULTY,
                     teacher_profile=obj,
