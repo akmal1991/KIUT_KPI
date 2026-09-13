@@ -1,6 +1,3 @@
-import secrets
-import string
-
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.hashers import make_password
@@ -9,17 +6,9 @@ from django.contrib.auth.hashers import make_password
 from modeltranslation.admin import TranslationAdmin
 
 from post.models import Post
+from user.credentials import generate_default_password, generate_default_username
 from user.models import User, Division, Teacher, ControlLimit, TeacherLevel, AcademicLevel, Target
 from django.contrib.auth.admin import UserAdmin
-
-
-def _generate_default_username():
-    return 'teacher_' + secrets.token_hex(3)
-
-
-def _generate_default_password():
-    alphabet = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(alphabet) for _ in range(10))
 
 
 class PostInline(admin.StackedInline):
@@ -50,8 +39,8 @@ class TeacherAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         existing_user = getattr(self.instance, 'user_account', None) if self.instance.pk else None
         if existing_user is None:
-            self.fields['username'].initial = _generate_default_username()
-            self.fields['password'].initial = _generate_default_password()
+            self.fields['username'].initial = generate_default_username()
+            self.fields['password'].initial = generate_default_password()
         else:
             self.fields['username'].initial = existing_user.username
             self.fields['username'].help_text = 'Existing login username for this teacher.'
@@ -95,7 +84,7 @@ class TeacherAdmin(admin.ModelAdmin):
                     # reverted migration never rolled back); a synthetic per-account
                     # address avoids colliding with it without touching that schema.
                     email=f'{username}@kiut.local',
-                    password=make_password(password or _generate_default_password()),
+                    password=make_password(password or generate_default_password()),
                     role=User.Role.FACULTY,
                     teacher_profile=obj,
                     must_change_password=True,

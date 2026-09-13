@@ -328,6 +328,24 @@
                             </div>
                         </div>
                     </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="teacherUsername">Логин:</label>
+                                <input type="text" class="form-control" name="username" id="teacherUsername">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="teacherPassword">Пароль:</label>
+                                <input type="text" class="form-control" name="password" id="teacherPassword">
+                                <small class="form-text text-muted">
+                                    Преподаватель должен будет сменить его при первом входе.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="popup-footer">
@@ -586,11 +604,22 @@
             $('#select-status').val(select_status)
         }
 
+        function randomCredentialString(length) {
+            const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+            }
+            return result;
+        }
+
         $('.openAddTeacherBtn').magnificPopup({
             removalDelay: 500,
             callbacks: {
                 beforeOpen: function () {
                     this.st.mainClass = this.st.el.attr('data-effect');
+                    $('#teacherUsername').val('teacher_' + randomCredentialString(6).toLowerCase());
+                    $('#teacherPassword').val(randomCredentialString(10));
                 }
             },
             midClick: true
@@ -667,6 +696,9 @@
 
             formData.append("status", $("#status").val());
             formData.append("uuid", $("#uuid").val());
+
+            formData.append("username", $("#teacherUsername").val());
+            formData.append("password", $("#teacherPassword").val());
 
             for (let i = 0; i < $("#imageUpload")[0].files.length; i++) {
                 formData.append('image', $("#imageUpload")[0].files[i]);
