@@ -11,7 +11,7 @@ import hashlib
 from django.core.cache import cache
 
 from post.models import Post, AcademicYear
-from user.models import Teacher, TeacherLevel, Division, ControlLimit
+from user.models import Teacher, TeacherLevel, Division, ControlLimit, User
 from . import serializers
 from ..post.paginatins import MyLimitOffsetPagination
 
@@ -166,3 +166,11 @@ class AllYearReport(APIView):
             response['group'][-1]['total_balls'] = total_balls
 
         return Response(response, status=200)
+
+
+class GetUpdateUserAccountView(generics.RetrieveUpdateAPIView):
+    """Assigns a role (and division, for Department Reviewers) to an
+    existing login account — see UserAccountAdminListView."""
+
+    queryset = User.objects.all()
+    serializer_class = serializers.UserAccountSerializer

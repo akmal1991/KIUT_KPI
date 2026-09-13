@@ -54,7 +54,8 @@ class AcademicLevel(models.Model):
 class User(AbstractUser):
     class Role(models.TextChoices):
         FACULTY = 'FACULTY', 'Faculty'
-        INSPECTOR = 'INSPECTOR', 'Inspector'
+        DEPARTMENT_REVIEWER = 'DEPARTMENT_REVIEWER', 'Department Reviewer'
+        SCIENTIFIC_DEPT_REVIEWER = 'SCIENTIFIC_DEPT_REVIEWER', 'Scientific Department Reviewer'
         ADMIN = 'ADMIN', 'Administrator'
 
     father_name = models.CharField(max_length=255, null=True, blank=True)
@@ -96,7 +97,8 @@ class Teacher(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def get_full_name(self):
-        return "%s %s %s" % (self.last_name, self.first_name, self.father_name)
+        parts = [self.last_name, self.first_name, self.father_name]
+        return " ".join(part for part in parts if part)
 
     def get_short_name(self):
         if not self.first_name:

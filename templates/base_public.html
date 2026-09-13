@@ -66,7 +66,7 @@
                                 {{ request.user.get_full_name|default:request.user.username }}
                             </button>
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownAccount">
-                                {% if request.user.is_superuser or request.user.role == 'INSPECTOR' %}
+                                {% if request.user.is_superuser or request.user.role == 'DEPARTMENT_REVIEWER' or request.user.role == 'SCIENTIFIC_DEPT_REVIEWER' %}
                                     <a class="dropdown-item" href="{% url 'user_public:review_dashboard' %}">{% trans 'Tekshirish' %}</a>
                                 {% endif %}
                                 {% if request.user.teacher_profile %}

@@ -11,4 +11,5 @@ urlpatterns = [
          name='teacher_level_get_update_delete'),
     path('teacher/<int:pk>/report/', views.TeacherYearReport.as_view(), name='teacher_report'),
     path('total/report/', views.AllYearReport.as_view(), name='total_report'),
+    path('account/<int:pk>', views.GetUpdateUserAccountView.as_view(), name='account_update'),
 ]

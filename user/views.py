@@ -168,6 +168,23 @@ class TeacherLevelAdminListView(LoginRequiredMixin, generic.ListView):
         return context
 
 
+class UserAccountAdminListView(LoginRequiredMixin, generic.ListView):
+    """Assigns roles (e.g. Department/Scientific Reviewer) to existing login
+    accounts. Accounts themselves are provisioned elsewhere: via the Add
+    Teacher modal (user.admin / api.v1.user for teacher-linked accounts) or
+    Django's built-in /admin/ for standalone ones."""
+
+    model = User
+    queryset = User.objects.all().order_by('username')
+    paginate_by = 20
+    template_name = 'administrator/user/list.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['division_list'] = Division.objects.all()
+        return context
+
+
 # ///////////////////////////////////////////////////////////////////////
 
 class TeacherPublicListView(generic.ListView):
@@ -312,11 +329,14 @@ class DivisionPublicDetailView(generic.DetailView):
 
 
 class ReviewerRequiredMixin(UserPassesTestMixin):
-    """Restricts a view to INSPECTOR accounts (or superusers)."""
+    """Restricts a view to DEPARTMENT_REVIEWER / SCIENTIFIC_DEPT_REVIEWER
+    accounts (or superusers)."""
 
     def test_func(self):
         user = self.request.user
-        return user.is_superuser or user.role == User.Role.INSPECTOR
+        return user.is_superuser or user.role in (
+            User.Role.DEPARTMENT_REVIEWER, User.Role.SCIENTIFIC_DEPT_REVIEWER,
+        )
 
 
 class ReviewDashboardView(LoginRequiredMixin, ReviewerRequiredMixin, generic.TemplateView):

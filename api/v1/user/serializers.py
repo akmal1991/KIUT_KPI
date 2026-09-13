@@ -85,3 +85,9 @@ class TeacherLevelSerializer(ModelSerializer):
     class Meta:
         model = TeacherLevel
         fields = ['id', 'name_uz', 'name_ru', 'name_en']
+
+
+class UserAccountSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'role', 'division']

@@ -1,0 +1,144 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="main-title d-flex align-items-center justify-content-between">
+            <h1 class="">Пользователи</h1>
+        </div>
+
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'index_admin:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Пользователи</li>
+        </ol>
+
+        <div class="main-table">
+            <table class="interior-table ">
+                <thead>
+                <tr>
+                    <th width="1%">№</th>
+                    <th width="150px">Логин</th>
+                    <th width="150px">Кафедра</th>
+                    <th width="150px">Роль</th>
+                    <th width="1%"></th>
+                </tr>
+                </thead>
+                <tbody class="tbody">
+                {% for account in user_list %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                        <td>{{ account.username }}</td>
+                        <td>{{ account.division.name|default:'—' }}</td>
+                        <td>{{ account.get_role_display }}</td>
+                        <td>
+                            <a href="#openEditAccount"
+                               data-url="{% url 'api_user:account_update' account.id %}"
+                               class="badge bg-primary openEditAccountBtn"><i class="fas fa-edit"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            {% load paginator %}
+            {% get_public_pagination %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block modals %}
+    <div id="openEditAccount" class="white-popup mfp-with-anim mfp-hide">
+        <div class="popup-main">
+            <div class="popup-title">
+                <h2>Редактировать роль</h2>
+            </div>
+            <div class="popup-content">
+                <form action="">
+                    <div class="form-group">
+                        <label for="usernameE">Логин:</label>
+                        <input type="text" class="form-control" id="usernameE" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="roleE">Роль:</label>
+                        <select class="selectpicker form-control" name="role" id="roleE" required>
+                            <option value="FACULTY">Преподаватель</option>
+                            <option value="DEPARTMENT_REVIEWER">Проверяющий кафедры</option>
+                            <option value="SCIENTIFIC_DEPT_REVIEWER">Проверяющий научного отдела</option>
+                            <option value="ADMIN">Администратор</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="divisionE">Кафедра (для проверяющего кафедры):</label>
+                        <select class="selectpicker form-control" name="division" id="divisionE">
+                            <option value="">отсутствует</option>
+                            {% for division in division_list %}
+                                <option value="{{ division.id }}">{{ division.name_ru }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="popup-footer">
+                <a href="#" class="btn btn-close">Отменить</a>
+                <a id="saveEditAccount" href="#" class="btn btn-primary">Сохранить</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        let edit_url = "";
+        $('.openEditAccountBtn').magnificPopup({
+            removalDelay: 500,
+            callbacks: {
+                beforeOpen: function () {
+                    this.st.mainClass = this.st.el.attr('data-effect');
+                }
+            },
+            midClick: true
+        });
+        $('.openEditAccountBtn').click(function () {
+            edit_url = $(this).data('url');
+            $.getJSON(`${edit_url}`, function (data) {
+                $("#usernameE").val(data.username);
+                $("#roleE").val(data.role);
+                $("#divisionE").val(data.division || "");
+
+                setTimeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                }, 500);
+            });
+        });
+
+        $("#saveEditAccount").click(function (e) {
+            e.preventDefault();
+
+            let formData = new FormData();
+            formData.append("role", $("#roleE").val());
+            if ($("#divisionE").val()) {
+                formData.append("division", $("#divisionE").val());
+            }
+
+            $.ajax({
+                headers: {"X-CSRFToken": "{{ csrf_token }}"},
+                url: edit_url,
+                processData: false,
+                contentType: false,
+                method: 'PATCH',
+                data: formData,
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert('Ошибка');
+                }
+            });
+        });
+
+        $('.btn-close').click(function (event) {
+            event.preventDefault();
+            $.magnificPopup.close();
+        });
+    </script>
+{% endblock %}
